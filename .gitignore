@@ -1,0 +1,21 @@
+# Lock files Excel & temporary files
+~$*.xlsx
+~$*.xls
+*.tmp
+
+# Python cache & compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

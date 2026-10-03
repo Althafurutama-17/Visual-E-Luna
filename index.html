@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Luna - Dashboard Operator Logistik Kebencanaan BPBD Jawa Barat</title>
+  
+  <!-- Font Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- SheetJS, Chart.js & Lucide Icons -->
+  <script src="xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Stylesheet dengan UI & Palet Warna Resmi E-Luna -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- TOP NAVBAR RESMI E-LUNA -->
+  <header class="top-navbar">
+    <!-- Logo Box Kiri (Putih) -->
+    <div class="top-navbar-logo-box">
+      <div class="top-navbar-logo-icon">e</div>
+      <div class="top-navbar-logo-text">
+        <h1>e-luna</h1>
+        <span>Elektronik Logistik untuk bencana</span>
+      </div>
+    </div>
+
+    <!-- Bilah Atas Biru (#0E63AA) -->
+    <div class="top-navbar-content">
+      <div class="top-navbar-title">
+        <button class="top-navbar-toggle-btn" title="Toggle Sidebar">
+          <i data-lucide="menu"></i>
+        </button>
+        <span>E-Luna - Elektronik Logistik untuk bencana</span>
+      </div>
+
+      <div class="top-navbar-right" style="display: flex; align-items: center; gap: 0.75rem;">
+        <!-- Status Integrasi Database Excel Langsung -->
+        <div class="db-status-pill" id="db-status-pill" title="Status Database: Terhubung langsung ke database_logistik_bpbd_jabar.xlsx. Klik untuk memuat ulang data" onclick="loadExcelDatabaseDirectly()">
+          <span class="db-status-dot" id="db-status-dot"></span>
+          <span id="db-status-label">Excel: database_logistik_bpbd_jabar.xlsx (250 Transaksi)</span>
+        </div>
+
+        <span style="font-size: 0.775rem; font-weight: 600; color: #FFFFFF; background: rgba(0,0,0,0.18); padding: 0.25rem 0.65rem; border-radius: 4px;">
+          Gudang Induk BPBD Jawa Barat
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- SIDEBAR GRADASI E-LUNA (BIRU #0B5C9E KE GELAP #162232) -->
+    <aside class="sidebar">
+      <div class="sidebar-online-status">
+        <span class="sidebar-online-dot"></span>
+        <span>Online &bull; Petugas Logistik</span>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li>
+          <a class="sidebar-item active">
+            <div class="sidebar-item-left">
+              <i data-lucide="layout-grid" style="width: 16px; height: 16px;"></i>
+              <span>Dashboard Operator</span>
+            </div>
+          </a>
+        </li>
+        <li>
+          <a class="sidebar-item" onclick="openModal('modal-bast')">
+            <div class="sidebar-item-left">
+              <i data-lucide="arrow-down-left" style="width: 16px; height: 16px; color: #10B981;"></i>
+              <span>(1) Penerimaan (BAST)</span>
+            </div>
+            <i data-lucide="chevron-down" style="width: 14px; height: 14px; opacity: 0.7;"></i>
+          </a>
+        </li>
+        <li>
+          <a class="sidebar-item" onclick="openModal('modal-sj')">
+            <div class="sidebar-item-left">
+              <i data-lucide="arrow-up-right" style="width: 16px; height: 16px; color: var(--eluna-orange);"></i>
+              <span>(2) Pendistribusian (SJ)</span>
+            </div>
+            <i data-lucide="chevron-down" style="width: 14px; height: 14px; opacity: 0.7;"></i>
+          </a>
+        </li>
+        <li>
+          <a class="sidebar-item" onclick="scrollToSection('sec-neraca')">
+            <div class="sidebar-item-left">
+              <i data-lucide="scale" style="width: 16px; height: 16px;"></i>
+              <span>Neraca Stok 4 Kategori</span>
+            </div>
+          </a>
+        </li>
+        <li>
+          <a class="sidebar-item" onclick="scrollToSection('sec-kadaluwarsa')">
+            <div class="sidebar-item-left">
+              <i data-lucide="alert-octagon" style="width: 16px; height: 16px; color: #EF4444;"></i>
+              <span>Status Kadaluwarsa</span>
+            </div>
+            <span class="badge-counter" id="badge-nav-kritis">2</span>
+          </a>
+        </li>
+        <li>
+          <a class="sidebar-item" onclick="scrollToSection('sec-distribusi')">
+            <div class="sidebar-item-left">
+              <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i>
+              <span>Distribusi 27 Kab/Kota</span>
+            </div>
+          </a>
+        </li>
+        <li style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08);">
+          <a class="sidebar-item" onclick="showToast('Sesi Operator Aktif: Nadhif Althafu Rutama')">
+            <div class="sidebar-item-left">
+              <i data-lucide="user" style="width: 16px; height: 16px;"></i>
+              <span>Nadhif Althafu R.</span>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-wrapper">
+      
+      <!-- PAGE TITLE -->
+      <h2 class="page-title">Dashboard Operator</h2>
+
+      <!-- FILTER BAR: KONTROL INTEGRASI EXCEL & FILTER PERIODE -->
+      <section class="filter-box-official">
+        <div class="filter-group-official">
+          <!-- Toggle Mode Tampilan -->
+          <div>
+            <label class="form-label-official">Mode Tampilan</label>
+            <div style="display: flex; gap: 0.35rem;">
+              <button class="btn-filter-mode active" id="btn-mode-default10" onclick="setFilterMode('default10')">
+                <i data-lucide="list-ordered" style="width: 14px; height: 14px;"></i>
+                <span>10 Terakhir</span>
+              </button>
+              <button class="btn-filter-mode" id="btn-mode-all" onclick="setFilterMode('all')">
+                <i data-lucide="database" style="width: 14px; height: 14px;"></i>
+                <span id="label-mode-all">Semua Data (250)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dropdown Tahun -->
+          <div>
+            <label class="form-label-official">Tahun</label>
+            <select class="form-input-official" id="select-tahun" style="width: 120px;" onchange="handleFilterChange()">
+              <option value="all">Semua Tahun</option>
+              <option value="2026" selected>2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+
+          <!-- Dropdown Bulan -->
+          <div>
+            <label class="form-label-official">Bulan</label>
+            <select class="form-input-official" id="select-bulan" style="width: 165px;" onchange="handleFilterChange()">
+              <option value="all">Pilih Bulan (Semua)</option>
+            </select>
+          </div>
+
+          <button class="btn-tampilkan" onclick="handleFilterChange()">TAMPILKAN</button>
+
+          <!-- Tombol Sinkronisasi Ulang Langsung dari Excel -->
+          <button class="btn-sync-excel" id="btn-sync-excel" title="Muat ulang langsung dari file database_logistik_bpbd_jabar.xlsx" onclick="loadExcelDatabaseDirectly()">
+            <i data-lucide="refresh-cw" id="icon-sync-spin" style="width: 14px; height: 14px;"></i>
+            <span>Muat Ulang Excel</span>
+          </button>
+
+          <!-- Tombol Unggah / Ganti File Excel -->
+          <button class="btn-arsip" title="Pilih file Excel lain dari komputer Anda" onclick="triggerExcelUpload()" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <i data-lucide="upload" style="width: 14px; height: 14px;"></i>
+            <span>Unggah Excel</span>
+          </button>
+          <input type="file" id="input-excel-file" accept=".xlsx,.xls" style="display: none;" onchange="handleExcelFileUpload(event)">
+
+          <!-- Tombol Unduh File Excel -->
+          <button class="btn-arsip" title="Unduh database_logistik_bpbd_jabar.xlsx ke PC" onclick="downloadExcelDatabase()" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+            <span>Unduh Excel</span>
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn-tampilkan" onclick="openModal('modal-bast')" style="background-color: var(--eluna-blue-topbar);">
+            + Input Penerimaan (BAST)
+          </button>
+          <button class="btn-tampilkan" onclick="openModal('modal-sj')">
+            + Input Distribusi (SJ)
+          </button>
+        </div>
+      </section>
+
+      <!-- 4 KARTU METRIK UTAMA OPERASIONAL (ORANGE TOP STRIPE KHAS E-LUNA) -->
+      <section>
+        <div class="section-header-title">
+          <span>Operasional &bull; Ringkasan Arus Logistik</span>
+          <span style="font-size: 0.775rem; font-weight: 600; color: #64748B;" id="indicator-filter-mode">
+            Mode Tampilan: 10 Inputan Terakhir (Default)
+          </span>
+        </div>
+
+        <div class="operasional-cards-grid">
+          <!-- KPI 1: Total Penerimaan (Masuk) -->
+          <div class="card-operasional">
+            <div class="card-op-title">Penerimaan (Jumlah Masuk)</div>
+            <div class="card-op-number" id="kpi-total-masuk" style="color: #10B981;">0</div>
+            <div class="card-op-footer">
+              <span id="kpi-bast-count">0 Dokumen BAST</span>
+              <span style="color: #10B981; font-weight: 700;">Masuk</span>
+            </div>
+          </div>
+
+          <!-- KPI 2: Total Distribusi (Keluar) -->
+          <div class="card-operasional">
+            <div class="card-op-title">Distribusi (Jumlah Keluar)</div>
+            <div class="card-op-number" id="kpi-total-keluar" style="color: var(--eluna-orange);">0</div>
+            <div class="card-op-footer">
+              <span id="kpi-sj-count">0 Surat Jalan</span>
+              <span style="color: var(--eluna-orange); font-weight: 700;">27 Kab/Kota</span>
+            </div>
+          </div>
+
+          <!-- KPI 3: Total Stok Akhir Gudang -->
+          <div class="card-operasional">
+            <div class="card-op-title">Total Stok Akhir Gudang</div>
+            <div class="card-op-number" id="kpi-total-stok-akhir" style="color: var(--eluna-blue-topbar);">0</div>
+            <div class="card-op-footer">
+              <span>Akumulasi Stok Logistik</span>
+              <span style="color: #0E63AA; font-weight: 700;">4 Kategori</span>
+            </div>
+          </div>
+
+          <!-- KPI 4: Status Barang Kadaluwarsa -->
+          <div class="card-operasional" style="border-top-color: #DC2626;">
+            <div class="card-op-title">Status Barang Kadaluwarsa</div>
+            <div class="card-op-number" id="kpi-total-kadaluwarsa" style="color: #DC2626;">0</div>
+            <div class="card-op-footer">
+              <span style="color: #DC2626; font-weight: 700;" id="kpi-sub-exp">0 Kadaluwarsa</span>
+              <span style="color: #D97706; font-weight: 700;" id="kpi-sub-warn">0 Warning (&le; X)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NERACA STOK 4 KATEGORI (SANDANG, PANGAN, PAPAN, LOGISTIK LAINNYA) -->
+      <section class="neraca-section-card" id="sec-neraca">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-heading); display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="scale" style="color: var(--eluna-orange); width: 18px; height: 18px;"></i>
+              Neraca Stok 4 Kategori Barang Logistik
+            </h3>
+          </div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--eluna-blue-topbar);">
+            Kategori: Sandang &bull; Pangan &bull; Papan &bull; Logistik Lainnya
+          </div>
+        </div>
+
+        <div class="neraca-4kategori-grid" id="neraca-grid-container">
+          <!-- Diisi dinamis oleh JavaScript -->
+        </div>
+      </section>
+
+      <!-- DUA VISUALISASI STATISTIK (PENERIMAAN SUMBER ANGGARAN & DISTRIBUSI 27 KAB/KOTA) -->
+      <section class="charts-grid-official" id="sec-distribusi">
+        
+        <!-- VISUALISASI 1: PENERIMAAN BERDASARKAN SUMBER ANGGARAN (APBD, APBN, CSR) -->
+        <div class="chart-card-official">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+            <div>
+              <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B;">Statistik Penerimaan Berdasarkan Sumber Anggaran</h4>
+              <p style="font-size: 0.75rem; color: #64748B;">Distribusi volume barang masuk menurut sumber pendanaan (APBD, APBN, CSR)</p>
+            </div>
+            <span style="font-size: 0.725rem; font-weight: 700; color: #16A34A; background: #DCFCE7; padding: 0.25rem 0.55rem; border-radius: 4px;" id="badge-vol-masuk">
+              0 Unit Masuk
+            </span>
+          </div>
+          <div class="chart-container-box">
+            <canvas id="chartPenerimaanSumberAnggaran"></canvas>
+          </div>
+        </div>
+
+        <!-- VISUALISASI 2: DISTRIBUSI (KELUAR KE 27 KAB/KOTA JAWA BARAT) -->
+        <div class="chart-card-official">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+            <div>
+              <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B;">Statistik Distribusi ke 27 Kab / Kota</h4>
+              <p style="font-size: 0.75rem; color: #64748B;">Kategori barang didistribusikan, jumlahnya, dan tujuannya di Jawa Barat</p>
+            </div>
+            <span style="font-size: 0.725rem; font-weight: 700; color: var(--eluna-orange); background: #FFF4EB; padding: 0.25rem 0.55rem; border-radius: 4px;" id="badge-vol-keluar">
+              0 Unit Keluar
+            </span>
+          </div>
+          <div class="chart-container-box">
+            <canvas id="chartDistribusiKabKota"></canvas>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- MODUL PENGAWASAN KADALUWARSA DINAMIS (PARAMETER X HARI) -->
+      <section class="kadaluwarsa-card-official" id="sec-kadaluwarsa">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h4 style="font-size: 1rem; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 0.45rem;">
+              <i data-lucide="clock" style="color: #DC2626; width: 18px; height: 18px;"></i>
+              Status Pengawasan Kadaluwarsa Barang Logistik
+            </h4>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <span class="badge-status-exp expired" id="badge-summary-exp">0 Kadaluwarsa</span>
+            <span class="badge-status-exp warning" id="badge-summary-warn">0 Warning (&le; X)</span>
+          </div>
+        </div>
+
+        <!-- Filter Parameter X Hari & Tab Status -->
+        <div class="kadaluwarsa-filter-bar">
+          <div class="param-x-controls">
+            <span>Tetapkan Ambang Batas Peringatan (X):</span>
+            <input type="number" class="input-x-styled" id="input-param-x" min="1" max="180" value="30" onchange="changeParamX(this.value)">
+            <span>Hari Sebelum Tanggal Kadaluwarsa Asli</span>
+          </div>
+
+          <div style="display: flex; gap: 0.45rem;">
+            <button class="btn-arsip" onclick="filterKadaluwarsaTab('semua')" id="btn-tab-semua" style="height: 32px; padding: 0 0.75rem;">Semua</button>
+            <button class="btn-arsip" onclick="filterKadaluwarsaTab('expired')" id="btn-tab-expired" style="height: 32px; padding: 0 0.75rem; color: #DC2626;">🔴 Kadaluwarsa</button>
+            <button class="btn-arsip" onclick="filterKadaluwarsaTab('warning')" id="btn-tab-warning" style="height: 32px; padding: 0 0.75rem; color: #D97706;">🟡 Warning (&le; X)</button>
+            <button class="btn-arsip" onclick="filterKadaluwarsaTab('aman')" id="btn-tab-aman" style="height: 32px; padding: 0 0.75rem; color: #16A34A;">🟢 Aman</button>
+          </div>
+        </div>
+
+        <!-- Tabel Rincian Barang Kadaluwarsa -->
+        <div class="official-table-wrapper" style="max-height: 320px;">
+          <table class="official-table">
+            <thead>
+              <tr>
+                <th style="width: 120px;">Kode Barang</th>
+                <th>Nama Barang Logpal</th>
+                <th style="width: 120px;">Kategori</th>
+                <th style="width: 110px;" class="text-right">Stok Fisik</th>
+                <th style="width: 140px;">Tgl Kadaluwarsa Asli</th>
+                <th style="width: 120px;" class="text-center">Sisa Hari</th>
+                <th style="width: 180px;">Status Kelayakan</th>
+                <th>Lokasi Gudang</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-kadaluwarsa">
+              <!-- Diisi dinamis -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TABEL RIWAYAT TRANSAKSI OPERATOR (DEFAULT 10 INPUTAN TERAKHIR) -->
+      <section class="official-table-card">
+        <div class="official-table-header-bar">
+          <div class="official-table-header-title">
+            <i data-lucide="list-checks" style="color: var(--eluna-orange); width: 18px; height: 18px;"></i>
+            <span id="title-mutasi-tabel">Daftar Inputan Mutasi (10 Terakhir)</span>
+          </div>
+          <div class="mutasi-tab-filters">
+            <button class="btn-filter-mutasi active" id="tab-mutasi-all" onclick="setMutasiTypeFilter('all')">Semua Mutasi</button>
+            <button class="btn-filter-mutasi" id="tab-mutasi-masuk" onclick="setMutasiTypeFilter('masuk')">Masuk Saja (BAST)</button>
+            <button class="btn-filter-mutasi" id="tab-mutasi-keluar" onclick="setMutasiTypeFilter('keluar')">Keluar Saja (SJ)</button>
+          </div>
+        </div>
+
+        <div class="official-table-wrapper">
+          <table class="official-table">
+            <thead>
+              <tr>
+                <th style="width: 45px;" class="text-center">No</th>
+                <th style="width: 130px;">Tanggal Input</th>
+                <th style="width: 150px;">No. Dokumen</th>
+                <th style="width: 110px;">Jenis</th>
+                <th style="width: 120px;">Kategori</th>
+                <th>Uraian Barang</th>
+                <th style="width: 110px;" class="text-right">Jumlah</th>
+                <th>Asal Sumber / Kab-Kota Tujuan</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-mutasi-operator">
+              <!-- Diisi dinamis 10 baris terakhir -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- MODAL BAST PENERIMAAN (MASUK) -->
+  <dialog id="modal-bast">
+    <div class="modal-header-official">
+      <span>Input Penerimaan Barang (BAST Masuk)</span>
+      <button onclick="closeModal('modal-bast')" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 1.15rem;">&times;</button>
+    </div>
+    <form method="dialog" onsubmit="submitBAST(event)">
+      <div class="modal-body-official">
+        <div style="margin-bottom: 0.85rem;">
+          <label class="form-label-official">Nomor Dokumen BAST</label>
+          <input type="text" class="form-input-official" id="form-bast-no" value="BAST-2026-X-0042" style="width: 100%;" required>
+        </div>
+        <div style="margin-bottom: 0.85rem;">
+          <label class="form-label-official">Kategori Barang</label>
+          <select class="form-input-official" id="form-bast-kat" style="width: 100%;" required>
+            <option value="Pangan">Pangan</option>
+            <option value="Sandang">Sandang</option>
+            <option value="Papan">Papan</option>
+            <option value="Logistik Lainnya">Logistik Lainnya</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 0.85rem;">
+          <label class="form-label-official">Uraian / Nama Barang</label>
+          <input type="text" class="form-input-official" id="form-bast-item" placeholder="Contoh: Paket Makanan Siap Saji" style="width: 100%;" required>
+        </div>
+        <div style="margin-bottom: 0.85rem;">
+          <label class="form-label-official">Jumlah Kuantitas Masuk</label>
+          <input type="number" class="form-input-official" id="form-bast-qty" min="1" placeholder="Contoh: 1500" style="width: 100%;" required>
+        </div>
+        <div style="margin-bottom: 0.85rem;">
+          <label class="form-label-official">Asal Sumber Bantuan</label>
+          <input type="text" class="form-input-official" id="form-bast-asal" value="Gudang Logistik BNPB Pusat" style="width: 100%;" required>
+        </div>
+      </div>
+      <div class="modal-footer-official">
+        <button type="button" class="btn-arsip" onclick="closeModal('modal-bast')">Batal</button>
+        <button type="submit" class="btn-tampilkan">Simpan Penerimaan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- MODAL SURAT JALAN DISTRIBUSI (KELUAR) -->
+  <dialog id="modal-sj">
+    <div class="modal-header-official">
+      <span>Input Distribusi Barang (Surat Jalan Keluar)</span>
+      <button onclick="closeModal('modal-sj')" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 1.15rem;">&times;</button>
+    </div>
+    <form method="dialog" onsubmit="submitSJ(event)">
+      <div class="modal-body-official">
+        <div style="margin-bottom: 0.85rem;">
+          <label class="form-label-official">Nomor Surat Jalan (SJ)</label>
+          <input type="text" class="form-input-official" id="form-sj-no" value="SJ-2026-X-0119" style="width: 100%;" required>
+        </div>
+        <div style="margin-bottom: 0.85rem;">
+          <label class="form-label-official">Kabupaten / Kota Tujuan (27 Kab/Kota Jawa Barat)</label>
+          <select class="form-input-official" id="form-sj-tujuan" style="width: 100%;" required>
+            <!-- Diisi otomatis dari 27 kab/kota Jawa Barat -->
+          </select>
+        </div>
+        <div style="margin-bottom: 0.85rem;">
+          <label class="form-label-official">Kategori Barang</label>
+          <select class="form-input-official" id="form-sj-kat" style="width: 100%;" required>
+            <option value="Pangan">Pangan</option>
+            <option value="Sandang">Sandang</option>
+            <option value="Papan">Papan</option>
+            <option value="Logistik Lainnya">Logistik Lainnya</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 0.85rem;">
+          <label class="form-label-official">Uraian / Nama Barang</label>
+          <input type="text" class="form-input-official" id="form-sj-item" placeholder="Contoh: Matras & Selimut Wol" style="width: 100%;" required>
+        </div>
+        <div style="margin-bottom: 0.85rem;">
+          <label class="form-label-official">Jumlah Kuantitas Keluar</label>
+          <input type="number" class="form-input-official" id="form-sj-qty" min="1" placeholder="Contoh: 300" style="width: 100%;" required>
+        </div>
+      </div>
+      <div class="modal-footer-official">
+        <button type="button" class="btn-arsip" onclick="closeModal('modal-sj')">Batal</button>
+        <button type="submit" class="btn-tampilkan">Terbitkan Distribusi</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

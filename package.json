@@ -1,0 +1,19 @@
+{
+  "name": "dashboard-eluna-bpbd-jabar",
+  "version": "1.0.0",
+  "description": "Dashboard Web Apps Monitoring Logistik Kebencanaan E-LUNA BPBD Provinsi Jawa Barat",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 3000",
+    "serve": "npx serve -l 3000"
+  },
+  "keywords": [
+    "dashboard",
+    "eluna",
+    "bpbd-jabar",
+    "humanitarian-logistics",
+    "buffer-stock"
+  ],
+  "author": "Nadhif Althafu Rutama",
+  "license": "ISC"
+}
