@@ -1320,9 +1320,9 @@ dialog::backdrop {
 }
 
 .badge-status-pemenuhan.kurang {
-  background-color: #FEF3C7;
-  color: #B45309;
-  border: 1px solid #FCD34D;
+  background-color: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FCA5A5;
 }
 
 .badge-status-pemenuhan.kritis {
@@ -1360,6 +1360,48 @@ dialog::backdrop {
   background-color: #0E63AA;
   border-color: #0E63AA;
   color: #FFFFFF;
+}
+
+/* Modern Filter Search Box Component (E-LUNA Standard) */
+.filter-search-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  padding: 0.35rem 0.65rem;
+  height: 34px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.filter-search-box:hover {
+  border-color: #94A3B8;
+  background-color: #F8FAFC;
+}
+
+.filter-search-box:focus-within {
+  border-color: #0E63AA;
+  background-color: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(14, 99, 170, 0.15);
+}
+
+.filter-search-box input {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 0.8rem;
+  color: #1E293B;
+  width: 100%;
+  font-family: inherit;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.filter-search-box input::placeholder {
+  color: #94A3B8;
+  font-weight: 500;
 }
 
 /* Tabel Neraca Finansial KALAK (Laporan Pertanggungjawaban Aset) */

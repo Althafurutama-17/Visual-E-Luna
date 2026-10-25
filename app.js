@@ -1788,7 +1788,7 @@ function renderKabidView() {
   const bAman = document.getElementById("btn-status-aman");
   if (bAman) bAman.textContent = `🟢 Aman (${countAman})`;
   const bKurang = document.getElementById("btn-status-kurang");
-  if (bKurang) bKurang.textContent = `🟡 Kurang (${countKurang})`;
+  if (bKurang) bKurang.textContent = `🔴 Kurang (${countKurang})`;
 
   // 3. Render 2 Grafik Chart.js
   renderKabidCharts(daerahMap, filteredReq, filteredDist);
@@ -1814,7 +1814,7 @@ function renderKabidCharts(daerahList, filteredReq, filteredDist) {
     const sortedDaerah = [...daerahList].sort((a, b) => b.capaian - a.capaian);
     const labels = sortedDaerah.map(d => d.daerah.replace("Kabupaten ", "Kab. "));
     const dataValues = sortedDaerah.map(d => parseFloat(d.capaian.toFixed(1)));
-    const bgColors = sortedDaerah.map(d => (d.status === "aman" ? "#16A34A" : "#D97706"));
+    const bgColors = sortedDaerah.map(d => (d.status === "aman" ? "#16A34A" : "#DC2626"));
 
     const ctx1 = canvas1.getContext("2d");
     chartKabidPemenuhanInstance = new Chart(ctx1, {
@@ -2028,7 +2028,7 @@ function renderKabidTable() {
     const isAman = d.status === "aman";
     const badgeHtml = isAman
       ? `<span class="badge-status-pemenuhan aman">🟢 Aman (≥90%)</span>`
-      : `<span class="badge-status-pemenuhan kurang">🟡 Kurang (&lt;90%)</span>`;
+      : `<span class="badge-status-pemenuhan kurang">🔴 Kurang (&lt;90%)</span>`;
 
     return `
       <tr>
@@ -2039,7 +2039,7 @@ function renderKabidTable() {
         <td class="num-cell" style="font-weight: 700;">${d.minta.toLocaleString('id-ID')}</td>
         <td class="num-cell positive" style="font-weight: 700;">${d.realisasi.toLocaleString('id-ID')}</td>
         <td class="num-cell ${d.gap > 0 ? 'negative' : ''}" style="font-weight: 700;">${d.gap.toLocaleString('id-ID')}</td>
-        <td style="text-align: center; font-weight: 800; color: ${isAman ? '#16A34A' : '#D97706'};">
+        <td style="text-align: center; font-weight: 800; color: ${isAman ? '#16A34A' : '#DC2626'};">
           ${d.capaian.toFixed(1)}%
         </td>
         <td style="text-align: center;">${badgeHtml}</td>
@@ -2082,7 +2082,7 @@ function openModalKabidRincian(daerahName) {
   const badgeEl = document.getElementById("modal-kabid-badge-status");
   if (badgeEl) {
     badgeEl.className = `badge-status-pemenuhan ${isAman ? 'aman' : 'kurang'}`;
-    badgeEl.textContent = isAman ? `🟢 Aman (${d.capaian.toFixed(1)}%)` : `🟡 Kurang (${d.capaian.toFixed(1)}%)`;
+    badgeEl.textContent = isAman ? `🟢 Aman (${d.capaian.toFixed(1)}%)` : `🔴 Kurang (${d.capaian.toFixed(1)}%)`;
   }
 
   const firstSurat = d.items.length > 0 && d.items[0].noSurat !== "-" ? d.items[0].noSurat : "PRM/2026/01/" + d.daerah.substring(0, 3).toUpperCase();
