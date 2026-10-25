@@ -823,6 +823,133 @@ dialog::backdrop {
   background-color: #047857;
 }
 
+.view-container {
+  display: block;
+  animation: fadeInView 0.25s ease-in-out;
+}
+
+@keyframes fadeInView {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================
+   DYNAMIC FILTER STATUS BAR & TAG PILLS
+   ========================================== */
+.badge-row-counter {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: var(--eluna-blue-topbar);
+  background-color: #EBF3FA;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+}
+
+.dynamic-filter-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #F8FAFC;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.65rem 1.25rem;
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.active-filter-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.text-filter-default {
+  color: #64748B;
+  font-size: 0.775rem;
+  font-style: italic;
+}
+
+.filter-pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #EFF6FF;
+  color: var(--eluna-blue-topbar);
+  border: 1px solid #BFDBFE;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.filter-pill-tag.tag-wilayah {
+  background-color: #FFF4EB;
+  color: var(--eluna-orange);
+  border-color: #FED7AA;
+}
+
+.filter-pill-tag .close-pill {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+
+.filter-pill-tag .close-pill:hover {
+  opacity: 1;
+}
+
+.btn-reset-chart-filter {
+  background: transparent;
+  border: 1px solid #CBD5E1;
+  color: #DC2626;
+  border-radius: 4px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.btn-reset-chart-filter:hover {
+  background-color: #FEE2E2;
+  border-color: #FCA5A5;
+}
+
+/* EMPTY STATE CARDS FOR VIEW KABID & VIEW KALAK */
+.empty-state-card {
+  background-color: var(--bg-card);
+  border: 1px dashed #CBD5E1;
+  border-radius: var(--radius-card);
+  padding: 4rem 2rem;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  margin-top: 1rem;
+}
+
+.empty-state-icon-box {
+  width: 72px;
+  height: 72px;
+  background-color: #F1F5F9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem auto;
+}
+
 .spin-animation {
   animation: spin 0.8s linear infinite;
 }
@@ -831,4 +958,480 @@ dialog::backdrop {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* ==========================================
+   TOMBOL & MODAL POP-UP STOK EKSISTING
+   ========================================== */
+.btn-stok-modal {
+  background-color: var(--eluna-blue-topbar);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-card);
+  padding: 0 0.85rem;
+  height: 32px;
+  font-size: 0.775rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(14, 99, 170, 0.2);
+}
+
+.btn-stok-modal:hover {
+  background-color: #0c538e;
+  box-shadow: 0 2px 6px rgba(14, 99, 170, 0.35);
+  transform: translateY(-1px);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.modal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.modal-box-large {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 25px 35px -5px rgba(0, 0, 0, 0.2), 0 15px 15px -5px rgba(0, 0, 0, 0.06);
+  width: 95vw;
+  max-width: 1380px;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #E2E8F0;
+  animation: modalScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleIn {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-header-official {
+  background: linear-gradient(135deg, #0E63AA 0%, #0A4A80 100%);
+  color: #FFFFFF;
+  padding: 1.1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.modal-close-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #FFFFFF;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transition: background-color 0.15s ease;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.modal-body-scrollable {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-info-strip {
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.modal-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.modal-search-input {
+  width: 260px;
+  height: 34px;
+  padding: 0 0.75rem;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  font-size: 0.825rem;
+  outline: none;
+}
+
+.modal-search-input:focus {
+  border-color: #0E63AA;
+  box-shadow: 0 0 0 2px rgba(14, 99, 170, 0.15);
+}
+
+/* Accordion Drilldown Styles */
+.row-item-master {
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.row-item-master:hover {
+  background-color: #F8FAFC !important;
+}
+
+.row-item-master.expanded {
+  background-color: #EFF6FF !important;
+}
+
+.drilldown-container-row {
+  background-color: #F8FAFC;
+  display: none;
+}
+
+.drilldown-container-row.active {
+  display: table-row;
+}
+
+.drilldown-content-box {
+  padding: 0.75rem 1.25rem 0.85rem 1.25rem;
+  background-color: #F8FAFC;
+  border-left: 3px solid #0E63AA;
+}
+
+.drilldown-subtable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #FFFFFF;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #E2E8F0;
+  font-size: 0.775rem;
+}
+
+.drilldown-subtable th {
+  background-color: #F1F5F9;
+  color: #475569;
+  font-weight: 700;
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.drilldown-subtable td {
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.badge-exp-exclude {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: #DC2626;
+  background-color: #FEE2E2;
+  border: 1px solid #FCA5A5;
+  border-radius: 4px;
+}
+
+/* ======================================================== */
+/* VIEW KABID & VIEW KALAK STYLES (E-LUNA VERSION 2.0)     */
+/* ======================================================== */
+
+/* Toolbar Filter Khusus Kabid & Kalak */
+.view-filter-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  padding: 0.75rem 1.15rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.view-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.view-filter-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.view-filter-select {
+  font-size: 0.825rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border-card);
+  border-radius: 6px;
+  background-color: #F8FAFC;
+  color: #1E293B;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.view-filter-select:focus {
+  border-color: #0E63AA;
+  background-color: #FFFFFF;
+}
+
+/* Grid Kartu Metrik KALAK (6 Metrik Finansial Makro) */
+.kalak-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+/* Kartu Finansial KALAK */
+.card-kalak-financial {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  padding: 1rem 1.15rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-kalak-financial:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card-kalak-financial::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background-color: var(--stripe-color, #0E63AA);
+}
+
+.card-kalak-title {
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.35rem;
+}
+
+.card-kalak-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.2;
+  font-family: var(--font-family);
+  margin-bottom: 0.4rem;
+}
+
+.card-kalak-footer {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px dashed #E2E8F0;
+  padding-top: 0.45rem;
+  margin-top: 0.35rem;
+}
+
+/* Status Badges untuk Capaian Pemenuhan Daerah */
+.badge-status-pemenuhan {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.badge-status-pemenuhan.aman {
+  background-color: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #86EFAC;
+}
+
+.badge-status-pemenuhan.kurang {
+  background-color: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FCD34D;
+}
+
+.badge-status-pemenuhan.kritis {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+  border: 1px solid #FCA5A5;
+}
+
+/* Filter Tombol Cepat Status Wilayah di View Kabid */
+.status-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.status-pill-btn {
+  font-size: 0.775rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #CBD5E1;
+  background-color: #F8FAFC;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.status-pill-btn:hover {
+  background-color: #E2E8F0;
+  color: #1E293B;
+}
+
+.status-pill-btn.active {
+  background-color: #0E63AA;
+  border-color: #0E63AA;
+  color: #FFFFFF;
+}
+
+/* Tabel Neraca Finansial KALAK (Laporan Pertanggungjawaban Aset) */
+.neraca-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-card);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  background-color: #FFFFFF;
+}
+
+.neraca-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.neraca-table thead th {
+  background-color: #0E63AA;
+  color: #FFFFFF;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+  border: 1px solid #11538C;
+  text-align: center;
+  font-size: 0.825rem;
+  letter-spacing: 0.02em;
+}
+
+.neraca-table tbody td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #E2E8F0;
+  color: #1E293B;
+  vertical-align: middle;
+}
+
+.neraca-table tbody tr:nth-child(even) {
+  background-color: #F8FAFC;
+}
+
+.neraca-table tbody tr:hover {
+  background-color: #F1F5F9;
+}
+
+.neraca-table tfoot td {
+  background-color: #EEF2F6;
+  font-weight: 800;
+  color: #0F172A;
+  padding: 0.85rem 1rem;
+  border-top: 2px solid #0E63AA;
+  border-bottom: 2px double #0E63AA;
+}
+
+.num-cell {
+  text-align: right;
+  font-family: "Consolas", monospace;
+  font-size: 0.875rem;
+}
+
+.num-cell.positive {
+  color: #15803D;
+  font-weight: 700;
+}
+
+.num-cell.negative {
+  color: #B91C1C;
+  font-weight: 700;
+}
+
+.num-cell.total-highlight {
+  color: #0E63AA;
+  font-weight: 800;
+}
+
+/* Badge Kategori Logistik */
+.badge-kat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+}
+
+
 

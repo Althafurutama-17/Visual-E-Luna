@@ -34,15 +34,12 @@
     <!-- Bilah Atas Biru (#0E63AA) -->
     <div class="top-navbar-content">
       <div class="top-navbar-title">
-        <button class="top-navbar-toggle-btn" title="Toggle Sidebar">
-          <i data-lucide="menu"></i>
-        </button>
         <span>E-Luna - Elektronik Logistik untuk bencana</span>
       </div>
 
       <div class="top-navbar-right" style="display: flex; align-items: center; gap: 0.75rem;">
-        <!-- Status Integrasi Database Excel Langsung -->
-        <div class="db-status-pill" id="db-status-pill" title="Status Database: Terhubung langsung ke database_logistik_bpbd_jabar.xlsx. Klik untuk memuat ulang data" onclick="loadExcelDatabaseDirectly()">
+        <!-- Status Integrasi Database Excel Langsung (Read-Only) -->
+        <div class="db-status-pill" id="db-status-pill" title="Status Basis Data: Terhubung langsung ke database_logistik_bpbd_jabar.xlsx" style="cursor: default;">
           <span class="db-status-dot" id="db-status-dot"></span>
           <span id="db-status-label">Excel: database_logistik_bpbd_jabar.xlsx (250 Transaksi)</span>
         </div>
@@ -56,83 +53,53 @@
 
   <div class="app-container">
     
-    <!-- SIDEBAR GRADASI E-LUNA (BIRU #0B5C9E KE GELAP #162232) -->
+    <!-- SIDEBAR STATIS E-LUNA (TIDAK BISA DIBUKA TUTUP, 3 TAB MULTI-STAKEHOLDER) -->
     <aside class="sidebar">
       <div class="sidebar-online-status">
         <span class="sidebar-online-dot"></span>
-        <span>Online &bull; Petugas Logistik</span>
+        <span>Online &bull; Sistem E-LUNA</span>
       </div>
 
       <ul class="sidebar-menu">
         <li>
-          <a class="sidebar-item active">
+          <a class="sidebar-item active" id="nav-view-operasional" onclick="switchDashboardView('operasional')">
             <div class="sidebar-item-left">
               <i data-lucide="layout-grid" style="width: 16px; height: 16px;"></i>
-              <span>Dashboard Operator</span>
+              <span>View Operasional</span>
             </div>
           </a>
         </li>
         <li>
-          <a class="sidebar-item" onclick="openModal('modal-bast')">
+          <a class="sidebar-item" id="nav-view-kabid" onclick="switchDashboardView('kabid')">
             <div class="sidebar-item-left">
-              <i data-lucide="arrow-down-left" style="width: 16px; height: 16px; color: #10B981;"></i>
-              <span>(1) Penerimaan (BAST)</span>
-            </div>
-            <i data-lucide="chevron-down" style="width: 14px; height: 14px; opacity: 0.7;"></i>
-          </a>
-        </li>
-        <li>
-          <a class="sidebar-item" onclick="openModal('modal-sj')">
-            <div class="sidebar-item-left">
-              <i data-lucide="arrow-up-right" style="width: 16px; height: 16px; color: var(--eluna-orange);"></i>
-              <span>(2) Pendistribusian (SJ)</span>
-            </div>
-            <i data-lucide="chevron-down" style="width: 14px; height: 14px; opacity: 0.7;"></i>
-          </a>
-        </li>
-        <li>
-          <a class="sidebar-item" onclick="scrollToSection('sec-neraca')">
-            <div class="sidebar-item-left">
-              <i data-lucide="scale" style="width: 16px; height: 16px;"></i>
-              <span>Neraca Stok 4 Kategori</span>
+              <i data-lucide="shield-alert" style="width: 16px; height: 16px; color: #38BDF8;"></i>
+              <span>View Kabid</span>
             </div>
           </a>
         </li>
         <li>
-          <a class="sidebar-item" onclick="scrollToSection('sec-kadaluwarsa')">
+          <a class="sidebar-item" id="nav-view-kalak" onclick="switchDashboardView('kalak')">
             <div class="sidebar-item-left">
-              <i data-lucide="alert-octagon" style="width: 16px; height: 16px; color: #EF4444;"></i>
-              <span>Status Kadaluwarsa</span>
-            </div>
-            <span class="badge-counter" id="badge-nav-kritis">2</span>
-          </a>
-        </li>
-        <li>
-          <a class="sidebar-item" onclick="scrollToSection('sec-distribusi')">
-            <div class="sidebar-item-left">
-              <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i>
-              <span>Distribusi 27 Kab/Kota</span>
-            </div>
-          </a>
-        </li>
-        <li style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08);">
-          <a class="sidebar-item" onclick="showToast('Sesi Operator Aktif: Nadhif Althafu Rutama')">
-            <div class="sidebar-item-left">
-              <i data-lucide="user" style="width: 16px; height: 16px;"></i>
-              <span>Nadhif Althafu R.</span>
+              <i data-lucide="award" style="width: 16px; height: 16px; color: var(--eluna-orange);"></i>
+              <span>View Kepala Pelaksana</span>
             </div>
           </a>
         </li>
       </ul>
+
+      <div style="margin-top: auto; padding: 1.25rem; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.725rem; color: #94A3B8;">
+        <div style="font-weight: 700; color: #E2E8F0; margin-bottom: 2px;">BPBD Provinsi Jawa Barat</div>
+        <div>Visual Dashboard Logistik</div>
+      </div>
     </aside>
 
     <!-- MAIN CONTENT -->
     <main class="main-wrapper">
       
       <!-- PAGE TITLE -->
-      <h2 class="page-title">Dashboard Operator</h2>
+      <h2 class="page-title" id="page-main-title">Dashboard Operasional Logistik</h2>
 
-      <!-- FILTER BAR: KONTROL INTEGRASI EXCEL & FILTER PERIODE -->
+      <!-- FILTER BAR: KONTROL FILTER PERIODE & ANALITIS (MURNI VISUAL DASHBOARD) -->
       <section class="filter-box-official">
         <div class="filter-group-official">
           <!-- Toggle Mode Tampilan -->
@@ -169,320 +136,668 @@
           </div>
 
           <button class="btn-tampilkan" onclick="handleFilterChange()">TAMPILKAN</button>
-
-          <!-- Tombol Sinkronisasi Ulang Langsung dari Excel -->
-          <button class="btn-sync-excel" id="btn-sync-excel" title="Muat ulang langsung dari file database_logistik_bpbd_jabar.xlsx" onclick="loadExcelDatabaseDirectly()">
-            <i data-lucide="refresh-cw" id="icon-sync-spin" style="width: 14px; height: 14px;"></i>
-            <span>Muat Ulang Excel</span>
-          </button>
-
-          <!-- Tombol Unggah / Ganti File Excel -->
-          <button class="btn-arsip" title="Pilih file Excel lain dari komputer Anda" onclick="triggerExcelUpload()" style="display: inline-flex; align-items: center; gap: 0.35rem;">
-            <i data-lucide="upload" style="width: 14px; height: 14px;"></i>
-            <span>Unggah Excel</span>
-          </button>
-          <input type="file" id="input-excel-file" accept=".xlsx,.xls" style="display: none;" onchange="handleExcelFileUpload(event)">
-
-          <!-- Tombol Unduh File Excel -->
-          <button class="btn-arsip" title="Unduh database_logistik_bpbd_jabar.xlsx ke PC" onclick="downloadExcelDatabase()" style="display: inline-flex; align-items: center; gap: 0.35rem;">
-            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-            <span>Unduh Excel</span>
-          </button>
         </div>
 
-        <div style="display: flex; gap: 0.5rem;">
-          <button class="btn-tampilkan" onclick="openModal('modal-bast')" style="background-color: var(--eluna-blue-topbar);">
-            + Input Penerimaan (BAST)
-          </button>
-          <button class="btn-tampilkan" onclick="openModal('modal-sj')">
-            + Input Distribusi (SJ)
-          </button>
+        <div style="font-size: 0.8rem; font-weight: 600; color: #64748B; display: flex; align-items: center; gap: 0.4rem;">
+          <i data-lucide="info" style="width: 14px; height: 14px; color: var(--eluna-blue-topbar);"></i>
+          <span>Database Terintegrasi Luring (SheetJS)</span>
         </div>
       </section>
 
-      <!-- 4 KARTU METRIK UTAMA OPERASIONAL (ORANGE TOP STRIPE KHAS E-LUNA) -->
-      <section>
-        <div class="section-header-title">
-          <span>Operasional &bull; Ringkasan Arus Logistik</span>
-          <span style="font-size: 0.775rem; font-weight: 600; color: #64748B;" id="indicator-filter-mode">
-            Mode Tampilan: 10 Inputan Terakhir (Default)
-          </span>
-        </div>
+      <!-- ======================================================== -->
+      <!-- VIEW 1: DASHBOARD OPERASIONAL (DEFAULT AKTIF)           -->
+      <!-- ======================================================== -->
+      <div id="container-view-operasional" class="view-container active">
+        <!-- 4 KARTU METRIK UTAMA OPERASIONAL (ORANGE TOP STRIPE KHAS E-LUNA) -->
+        <section>
+          <div class="section-header-title">
+            <span>Operasional &bull; Ringkasan Arus Logistik</span>
+            <span style="font-size: 0.775rem; font-weight: 600; color: #64748B;" id="indicator-filter-mode">
+              Mode Tampilan: 10 Inputan Terakhir (Default)
+            </span>
+          </div>
 
-        <div class="operasional-cards-grid">
-          <!-- KPI 1: Total Penerimaan (Masuk) -->
-          <div class="card-operasional">
-            <div class="card-op-title">Penerimaan (Jumlah Masuk)</div>
-            <div class="card-op-number" id="kpi-total-masuk" style="color: #10B981;">0</div>
-            <div class="card-op-footer">
-              <span id="kpi-bast-count">0 Dokumen BAST</span>
-              <span style="color: #10B981; font-weight: 700;">Masuk</span>
+          <div class="operasional-cards-grid">
+            <!-- KPI 1: Total Penerimaan (Masuk) -->
+            <div class="card-operasional">
+              <div class="card-op-title">Penerimaan (Jumlah Masuk)</div>
+              <div class="card-op-number" id="kpi-total-masuk" style="color: #10B981;">0</div>
+              <div class="card-op-footer">
+                <span id="kpi-bast-count">0 Dokumen BAST</span>
+                <span style="color: #10B981; font-weight: 700;">Masuk</span>
+              </div>
+            </div>
+
+            <!-- KPI 2: Total Distribusi (Keluar) -->
+            <div class="card-operasional">
+              <div class="card-op-title">Distribusi (Jumlah Keluar)</div>
+              <div class="card-op-number" id="kpi-total-keluar" style="color: var(--eluna-orange);">0</div>
+              <div class="card-op-footer">
+                <span id="kpi-sj-count">0 Surat Jalan</span>
+                <span style="color: var(--eluna-orange); font-weight: 700;">27 Kab/Kota</span>
+              </div>
+            </div>
+
+            <!-- KPI 3: Total Stok Akhir Gudang -->
+            <div class="card-operasional">
+              <div class="card-op-title">Total Stok Akhir Gudang</div>
+              <div class="card-op-number" id="kpi-total-stok-akhir" style="color: var(--eluna-blue-topbar);">0</div>
+              <div class="card-op-footer">
+                <span id="kpi-stok-awal-note" style="color: #64748B; font-weight: 600;" title="Rumus: Stok Awal (30.189) + Masuk - Keluar = Stok Akhir">Stok Awal: 30.189 Unit</span>
+                <span style="color: #0E63AA; font-weight: 700;">4 Kategori</span>
+              </div>
+            </div>
+
+            <!-- KPI 4: Status Barang Kadaluwarsa -->
+            <div class="card-operasional" style="border-top-color: #DC2626;">
+              <div class="card-op-title">Status Barang Kadaluwarsa</div>
+              <div class="card-op-number" id="kpi-total-kadaluwarsa" style="color: #DC2626;">0</div>
+              <div class="card-op-footer">
+                <span style="color: #DC2626; font-weight: 700;" id="kpi-sub-exp">0 Kadaluwarsa</span>
+                <span style="color: #D97706; font-weight: 700;" id="kpi-sub-warn">0 Warning (&le; X)</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DUA VISUALISASI STATISTIK (PENERIMAAN SUMBER ANGGARAN & DISTRIBUSI 27 KAB/KOTA) -->
+        <section class="charts-grid-official" id="sec-distribusi">
+          <!-- VISUALISASI 1: PENERIMAAN BERDASARKAN SUMBER ANGGARAN (APBD, APBN, CSR) -->
+          <div class="chart-card-official">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+              <div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B;">Statistik Penerimaan Berdasarkan Sumber Anggaran</h4>
+                <p style="font-size: 0.75rem; color: #64748B;">Klik bar untuk menyaring tabel (APBD / APBN / CSR)</p>
+              </div>
+              <span style="font-size: 0.725rem; font-weight: 700; color: #16A34A; background: #DCFCE7; padding: 0.25rem 0.55rem; border-radius: 4px;" id="badge-vol-masuk">
+                0 Unit Masuk
+              </span>
+            </div>
+            <div class="chart-container-box">
+              <canvas id="chartPenerimaanSumberAnggaran"></canvas>
             </div>
           </div>
 
-          <!-- KPI 2: Total Distribusi (Keluar) -->
-          <div class="card-operasional">
-            <div class="card-op-title">Distribusi (Jumlah Keluar)</div>
-            <div class="card-op-number" id="kpi-total-keluar" style="color: var(--eluna-orange);">0</div>
-            <div class="card-op-footer">
-              <span id="kpi-sj-count">0 Surat Jalan</span>
-              <span style="color: var(--eluna-orange); font-weight: 700;">27 Kab/Kota</span>
+          <!-- VISUALISASI 2: DISTRIBUSI (KELUAR KE 27 KAB/KOTA JAWA BARAT) -->
+          <div class="chart-card-official">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+              <div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B;">Statistik Distribusi ke 27 Kab / Kota</h4>
+                <p style="font-size: 0.75rem; color: #64748B;">Klik bar wilayah untuk menyaring tabel tujuan penyaluran</p>
+              </div>
+              <span style="font-size: 0.725rem; font-weight: 700; color: var(--eluna-orange); background: #FFF4EB; padding: 0.25rem 0.55rem; border-radius: 4px;" id="badge-vol-keluar">
+                0 Unit Keluar
+              </span>
+            </div>
+            <div class="chart-container-box">
+              <canvas id="chartDistribusiKabKota"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- TABEL DINAMIS HASIL FILTER INTERAKTIF BAR CHART -->
+        <section class="official-table-card" id="sec-tabel-dinamis" style="margin-top: 1.5rem;">
+          <div class="official-table-header-bar">
+            <div class="official-table-header-title">
+              <i data-lucide="filter" style="color: var(--eluna-orange); width: 18px; height: 18px;"></i>
+              <span id="title-tabel-dinamis">Tabel Dinamis Transaksi Logistik</span>
+              <span id="counter-tabel-dinamis" class="badge-row-counter">0 Transaksi</span>
+            </div>
+            
+            <!-- Filter Jenis: Semua, Masuk Saja, Keluar Saja & Tombol Cek Stok Eksisting -->
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <button class="btn-stok-modal" id="btn-modal-stok" onclick="openModalStokEksisting()" title="Lihat rincian sisa stok eksisting per barang dan sumber pendanaan">
+                <i data-lucide="boxes" style="width: 14px; height: 14px;"></i>
+                <span>Stok</span>
+              </button>
+              <div class="mutasi-tab-filters">
+                <button class="btn-filter-mutasi active" id="tab-dyn-all" onclick="setDynamicTypeFilter('all')">Semua Mutasi</button>
+                <button class="btn-filter-mutasi" id="tab-dyn-masuk" onclick="setDynamicTypeFilter('masuk')">Masuk Saja</button>
+                <button class="btn-filter-mutasi" id="tab-dyn-keluar" onclick="setDynamicTypeFilter('keluar')">Keluar Saja</button>
+              </div>
             </div>
           </div>
 
-          <!-- KPI 3: Total Stok Akhir Gudang -->
-          <div class="card-operasional">
-            <div class="card-op-title">Total Stok Akhir Gudang</div>
-            <div class="card-op-number" id="kpi-total-stok-akhir" style="color: var(--eluna-blue-topbar);">0</div>
-            <div class="card-op-footer">
-              <span>Akumulasi Stok Logistik</span>
-              <span style="color: #0E63AA; font-weight: 700;">4 Kategori</span>
+          <!-- Bar Status Filter Aktif dari Bar Chart -->
+          <div class="dynamic-filter-status-bar" id="dynamic-filter-tags-container">
+            <div class="active-filter-tags" id="active-filter-pills">
+              <span class="text-filter-default">Menampilkan seluruh data transaksi (Klik bar chart di atas untuk memfilter data secara spesifik)</span>
+            </div>
+            <button class="btn-reset-chart-filter" id="btn-reset-filter" style="display: none;" onclick="resetChartFilters()">
+              <i data-lucide="x-circle" style="width: 14px; height: 14px;"></i>
+              <span>Reset Filter Grafik</span>
+            </button>
+          </div>
+
+          <!-- Tabel Dinamis Diperpanjang Menampilkan 10 Entry Pas -->
+          <div class="official-table-wrapper" style="min-height: 490px; max-height: 525px;">
+            <table class="official-table">
+              <thead>
+                <tr>
+                  <th style="width: 45px;" class="text-center">No</th>
+                  <th style="width: 110px;">Tanggal Input</th>
+                  <th style="width: 150px;">No. Dokumen</th>
+                  <th style="width: 95px;" class="text-center">Jenis</th>
+                  <th style="width: 115px;">Kategori</th>
+                  <th>Uraian Barang</th>
+                  <th style="width: 120px;" class="text-right">Jumlah</th>
+                  <th style="width: 115px;" class="text-center">Sumber Anggaran</th>
+                  <th>Tujuan Distribusi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-dinamis-transaksi">
+                <!-- Diisi dinamis oleh JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- MODUL PENGAWASAN KADALUWARSA DINAMIS (PARAMETER X HARI) -->
+        <section class="kadaluwarsa-card-official" id="sec-kadaluwarsa">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <h4 style="font-size: 1rem; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 0.45rem;">
+                <i data-lucide="clock" style="color: #DC2626; width: 18px; height: 18px;"></i>
+                Status Pengawasan Kadaluwarsa Barang Logistik
+              </h4>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <span class="badge-status-exp expired" id="badge-summary-exp">0 Kadaluwarsa</span>
+              <span class="badge-status-exp warning" id="badge-summary-warn">0 Warning (&le; 60 Hari)</span>
             </div>
           </div>
 
-          <!-- KPI 4: Status Barang Kadaluwarsa -->
-          <div class="card-operasional" style="border-top-color: #DC2626;">
-            <div class="card-op-title">Status Barang Kadaluwarsa</div>
-            <div class="card-op-number" id="kpi-total-kadaluwarsa" style="color: #DC2626;">0</div>
-            <div class="card-op-footer">
-              <span style="color: #DC2626; font-weight: 700;" id="kpi-sub-exp">0 Kadaluwarsa</span>
-              <span style="color: #D97706; font-weight: 700;" id="kpi-sub-warn">0 Warning (&le; X)</span>
+          <!-- Filter Parameter X Hari & Tab Status (Fokus Kritis & Default 60 Hari) -->
+          <div class="kadaluwarsa-filter-bar">
+            <div class="param-x-controls">
+              <span>Tetapkan Ambang Batas Peringatan (X):</span>
+              <input type="number" class="input-x-styled" id="input-param-x" min="1" max="180" value="60" onchange="changeParamX(this.value)">
+              <span>Hari Sebelum Tanggal Kadaluwarsa Asli</span>
+            </div>
+
+            <div style="display: flex; gap: 0.45rem;">
+              <button class="btn-arsip active" onclick="filterKadaluwarsaTab('kritis')" id="btn-tab-kritis" style="height: 32px; padding: 0 0.75rem;">Semua Kritis (Kadaluwarsa &amp; Warning)</button>
+              <button class="btn-arsip" onclick="filterKadaluwarsaTab('expired')" id="btn-tab-expired" style="height: 32px; padding: 0 0.75rem; color: #DC2626;">🔴 Kadaluwarsa</button>
+              <button class="btn-arsip" onclick="filterKadaluwarsaTab('warning')" id="btn-tab-warning" style="height: 32px; padding: 0 0.75rem; color: #D97706;">🟡 Warning (&le; 60 Hari)</button>
+              <button class="btn-arsip" onclick="filterKadaluwarsaTab('aman')" id="btn-tab-aman" style="height: 32px; padding: 0 0.75rem; color: #16A34A;">🟢 Aman</button>
             </div>
           </div>
-        </div>
-      </section>
 
-      <!-- NERACA STOK 4 KATEGORI (SANDANG, PANGAN, PAPAN, LOGISTIK LAINNYA) -->
-      <section class="neraca-section-card" id="sec-neraca">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
-          <div>
-            <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-heading); display: flex; align-items: center; gap: 0.5rem;">
-              <i data-lucide="scale" style="color: var(--eluna-orange); width: 18px; height: 18px;"></i>
-              Neraca Stok 4 Kategori Barang Logistik
-            </h3>
+          <!-- Tabel Rincian Barang Kadaluwarsa (Minimal 5 Baris Pas Tanpa Terpotong) -->
+          <div class="official-table-wrapper" style="min-height: 400px; max-height: 435px;">
+            <table class="official-table">
+              <thead>
+                <tr>
+                  <th style="width: 120px;">Kode Barang</th>
+                  <th>Nama Barang Logpal</th>
+                  <th style="width: 120px;">Kategori</th>
+                  <th style="width: 110px;" class="text-right">Stok Fisik</th>
+                  <th style="width: 140px;">Tgl Kadaluwarsa Asli</th>
+                  <th style="width: 120px;" class="text-center">Sisa Hari</th>
+                  <th style="width: 180px;">Status Kelayakan</th>
+                  <th>Lokasi Gudang</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-kadaluwarsa">
+                <!-- Diisi dinamis -->
+              </tbody>
+            </table>
           </div>
-          <div style="font-size: 0.8rem; font-weight: 700; color: var(--eluna-blue-topbar);">
-            Kategori: Sandang &bull; Pangan &bull; Papan &bull; Logistik Lainnya
-          </div>
-        </div>
+        </section>
 
-        <div class="neraca-4kategori-grid" id="neraca-grid-container">
-          <!-- Diisi dinamis oleh JavaScript -->
-        </div>
-      </section>
+      </div>
 
-      <!-- DUA VISUALISASI STATISTIK (PENERIMAAN SUMBER ANGGARAN & DISTRIBUSI 27 KAB/KOTA) -->
-      <section class="charts-grid-official" id="sec-distribusi">
+      <!-- ======================================================== -->
+      <!-- VIEW 2: VIEW KEPALA BIDANG KEDARURATAN & LOGISTIK (MANAJERIAL KUANTITAS PENGUATAN) -->
+      <!-- ======================================================== -->
+      <div id="container-view-kabid" class="view-container" style="display: none;">
         
-        <!-- VISUALISASI 1: PENERIMAAN BERDASARKAN SUMBER ANGGARAN (APBD, APBN, CSR) -->
-        <div class="chart-card-official">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
-            <div>
-              <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B;">Statistik Penerimaan Berdasarkan Sumber Anggaran</h4>
-              <p style="font-size: 0.75rem; color: #64748B;">Distribusi volume barang masuk menurut sumber pendanaan (APBD, APBN, CSR)</p>
-            </div>
-            <span style="font-size: 0.725rem; font-weight: 700; color: #16A34A; background: #DCFCE7; padding: 0.25rem 0.55rem; border-radius: 4px;" id="badge-vol-masuk">
-              0 Unit Masuk
+        <!-- TOOLBAR FILTER VIEW KABID -->
+        <div class="view-filter-toolbar">
+          <div class="view-filter-group">
+            <span class="view-filter-label">
+              <i data-lucide="filter" style="width: 16px; height: 16px; color: #0E63AA;"></i>
+              Filter Siklus Penguatan:
+            </span>
+            <select id="kabid-filter-tahun" class="view-filter-select" onchange="handleKabidFilterChange()">
+              <option value="ALL">Semua Tahun Anggaran (2025 - 2026)</option>
+              <option value="2026">Tahun Anggaran 2026</option>
+              <option value="2025">Tahun Anggaran 2025</option>
+            </select>
+            <select id="kabid-filter-kategori" class="view-filter-select" onchange="handleKabidFilterChange()">
+              <option value="ALL">Semua Kategori Logistik</option>
+              <option value="Pangan">Pangan</option>
+              <option value="Sandang">Sandang</option>
+              <option value="Papan">Papan</option>
+              <option value="Logistik Lainnya">Logistik Lainnya</option>
+            </select>
+          </div>
+          <div style="font-size: 0.775rem; color: #64748B; font-weight: 600;" id="kabid-filter-indicator">
+            Konteks: Evaluasi Pagu Cadangan Daerah (27 Kab/Kota)
+          </div>
+        </div>
+
+        <!-- 4 KARTU METRIK KUANTITAS UTAMA (FOKUS KUANTITAS BARANG / BUKAN RUPIAH) -->
+        <section>
+          <div class="section-header-title">
+            <span>Manajerial &bull; Ringkasan Kuantitas Penguatan Cadangan Daerah</span>
+            <span style="font-size: 0.75rem; font-weight: 700; color: #0E63AA; background: #E0F2FE; padding: 0.2rem 0.6rem; border-radius: 4px;" id="badge-total-daerah-kabid">
+              27 Kabupaten / Kota
             </span>
           </div>
-          <div class="chart-container-box">
-            <canvas id="chartPenerimaanSumberAnggaran"></canvas>
+
+          <div class="operasional-cards-grid">
+            <!-- KPI 1: Total Permintaan (Unit/Paket) -->
+            <div class="card-operasional" style="border-top-color: #3B82F6;">
+              <div class="card-op-title">Total Permohonan Daerah</div>
+              <div class="card-op-number" id="kpi-kabid-total-minta" style="color: #3B82F6;">0</div>
+              <div class="card-op-footer">
+                <span id="kpi-kabid-surat-count">0 Surat Permohonan</span>
+                <span style="color: #3B82F6; font-weight: 700;">Penguatan</span>
+              </div>
+            </div>
+
+            <!-- KPI 2: Total Barang Teralokasikan (Unit/Paket) -->
+            <div class="card-operasional" style="border-top-color: #10B981;">
+              <div class="card-op-title">Total Realisasi Penyaluran</div>
+              <div class="card-op-number" id="kpi-kabid-total-alokasi" style="color: #10B981;">0</div>
+              <div class="card-op-footer">
+                <span id="kpi-kabid-rasio-pemenuhan">Capaian: 0%</span>
+                <span style="color: #10B981; font-weight: 700;">Tersalurkan</span>
+              </div>
+            </div>
+
+            <!-- KPI 3: Total Gap (Selisih Belum Terpenuhi) -->
+            <div class="card-operasional" style="border-top-color: var(--eluna-orange);">
+              <div class="card-op-title">Total Kesenjangan (Gap)</div>
+              <div class="card-op-number" id="kpi-kabid-total-gap" style="color: var(--eluna-orange);">0</div>
+              <div class="card-op-footer">
+                <span id="kpi-kabid-gap-percent">Sisa Kebutuhan: 0%</span>
+                <span style="color: var(--eluna-orange); font-weight: 700;">Defisit</span>
+              </div>
+            </div>
+
+            <!-- KPI 4: Jumlah Wilayah Kritis (< 50%) -->
+            <div class="card-operasional" style="border-top-color: #DC2626;">
+              <div class="card-op-title">Wilayah Kritis (&lt; 50%)</div>
+              <div class="card-op-number" id="kpi-kabid-wilayah-kritis" style="color: #DC2626;">0</div>
+              <div class="card-op-footer">
+                <span style="color: #DC2626; font-weight: 700;" id="kpi-kabid-wilayah-sub">Prioritas Alokasi Tahap II</span>
+                <span style="color: #DC2626; font-weight: 700;">Atensi Khusus</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DUA VISUALISASI UTAMA VIEW KABID -->
+        <section class="charts-grid-official">
+          <!-- VISUALISASI 1: BAR CHART HORIZONTAL STATUS PEMENUHAN PER WILAYAH -->
+          <div class="chart-card-official">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+              <div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B;">Status Pemenuhan Penguatan Logistik per Wilayah</h4>
+                <p style="font-size: 0.75rem; color: #64748B;">Klik bar wilayah untuk menyaring tabel drill-down di bawah</p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 700;">
+                <span class="badge-status-pemenuhan aman">Aman &ge;80%</span>
+                <span class="badge-status-pemenuhan kurang">Kurang 50-79%</span>
+                <span class="badge-status-pemenuhan kritis">Kritis &lt;50%</span>
+              </div>
+            </div>
+            <div class="chart-container-box" style="height: 420px;">
+              <canvas id="chartKabidPemenuhanWilayah"></canvas>
+            </div>
+          </div>
+
+          <!-- VISUALISASI 2: GROUPED BAR CHART GAP PER KATEGORI BARANG -->
+          <div class="chart-card-official">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+              <div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B;">Perbandingan Permintaan vs Realisasi per Kategori</h4>
+                <p style="font-size: 0.75rem; color: #64748B;">Analisis kesenjangan kuantitas logistik 4 kategori</p>
+              </div>
+              <span style="font-size: 0.725rem; font-weight: 700; color: #0E63AA; background: #E0F2FE; padding: 0.25rem 0.55rem; border-radius: 4px;" id="badge-kategori-gap-count">
+                4 Kategori Logistik
+              </span>
+            </div>
+            <div class="chart-container-box" style="height: 420px;">
+              <canvas id="chartKabidGapKategori"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- TABEL INTERAKTIF DRILL-DOWN KESENJANGAN LOGISTIK DAERAH -->
+        <section style="margin-top: 1.75rem;">
+          <div class="data-table-card">
+            <div class="table-card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+              <div>
+                <h3 class="table-title">Tabel Rincian Permohonan & Kesenjangan (Gap) Logistik Daerah</h3>
+                <p class="table-subtitle">Data komparatif pagu kebutuhan cadangan tahunan terhadap realisasi penyaluran bertahap</p>
+              </div>
+
+              <!-- Filter Cepat Status & Search -->
+              <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                <div class="status-filter-pills">
+                  <button class="status-pill-btn active" id="btn-status-all" onclick="filterKabidTableStatus('ALL')">Semua (27)</button>
+                  <button class="status-pill-btn" id="btn-status-kritis" onclick="filterKabidTableStatus('kritis')" style="color: #DC2626;">🔴 Kritis (&lt;50%)</button>
+                  <button class="status-pill-btn" id="btn-status-kurang" onclick="filterKabidTableStatus('kurang')" style="color: #D97706;">🟡 Kurang (50-79%)</button>
+                  <button class="status-pill-btn" id="btn-status-aman" onclick="filterKabidTableStatus('aman')" style="color: #16A34A;">🟢 Aman (&ge;80%)</button>
+                </div>
+
+                <div class="filter-search-box" style="width: 220px;">
+                  <i data-lucide="search" style="width: 14px; height: 14px; color: #64748B;"></i>
+                  <input type="text" id="kabid-search-input" placeholder="Cari wilayah/barang..." oninput="handleKabidSearch(this.value)">
+                </div>
+
+                <button class="btn-export-excel" onclick="resetKabidTableFilter()" title="Reset Filter Tabel" style="padding: 0.4rem 0.75rem;">
+                  <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <!-- TABEL DINAMIS DRILL-DOWN KABID -->
+            <div class="table-scroll-wrapper" style="max-height: 480px;">
+              <table class="data-table" id="table-kabid-drilldown">
+                <thead>
+                  <tr>
+                    <th style="width: 48px; text-align: center;">No</th>
+                    <th>Kabupaten / Kota</th>
+                    <th>Kategori</th>
+                    <th>Komoditas</th>
+                    <th style="text-align: right;">Permohonan (Unit)</th>
+                    <th style="text-align: right;">Realisasi Salur (Unit)</th>
+                    <th style="text-align: right;">Kesenjangan Gap (Unit)</th>
+                    <th style="text-align: center;">Capaian (%)</th>
+                    <th style="text-align: center;">Status Ketercukupan</th>
+                    <th>Rekomendasi Tindak Lanjut</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-kabid-drilldown">
+                  <!-- Diisi secara dinamis oleh JavaScript -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-footer-pagination" style="justify-content: space-between;">
+              <span id="kabid-table-counter" style="font-size: 0.8rem; color: #64748B; font-weight: 600;">
+                Menampilkan 0 entri
+              </span>
+              <span style="font-size: 0.75rem; color: #0E63AA; font-weight: 600;">
+                Basis Data: Surat Permohonan Penguatan Logistik Tahunan BPBD Jawa Barat
+              </span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 3: STRATEGIC VIEW KEPALA PELAKSANA BPBD JAWA BARAT (FINANSIAL MAKRO RP) -->
+      <!-- ======================================================== -->
+      <div id="container-view-kalak" class="view-container" style="display: none;">
+        
+        <!-- TOOLBAR FILTER VIEW KALAK -->
+        <div class="view-filter-toolbar">
+          <div class="view-filter-group">
+            <span class="view-filter-label">
+              <i data-lucide="wallet" style="width: 16px; height: 16px; color: #0E63AA;"></i>
+              Filter Tata Kelola Anggaran:
+            </span>
+            <select id="kalak-filter-sumber-dana" class="view-filter-select" onchange="handleKalakFilterChange()">
+              <option value="ALL">Semua Sumber Anggaran (APBD, APBN, CSR)</option>
+              <option value="APBD">APBD Provinsi Jawa Barat</option>
+              <option value="APBN">APBN (BNPB)</option>
+              <option value="CSR">CSR / Bantuan Masyarakat</option>
+            </select>
+            <select id="kalak-filter-tahun" class="view-filter-select" onchange="handleKalakFilterChange()">
+              <option value="ALL">Semua Periode Anggaran (2025 - 2026)</option>
+              <option value="2026">Tahun Anggaran 2026</option>
+              <option value="2025">Tahun Anggaran 2025</option>
+            </select>
+          </div>
+          <div style="font-size: 0.775rem; color: #64748B; font-weight: 600;">
+            Valuasi Aset Terdaftar: Standar Satuan Harga (SSH) Logistik Kebencanaan
           </div>
         </div>
 
-        <!-- VISUALISASI 2: DISTRIBUSI (KELUAR KE 27 KAB/KOTA JAWA BARAT) -->
-        <div class="chart-card-official">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
-            <div>
-              <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B;">Statistik Distribusi ke 27 Kab / Kota</h4>
-              <p style="font-size: 0.75rem; color: #64748B;">Kategori barang didistribusikan, jumlahnya, dan tujuannya di Jawa Barat</p>
-            </div>
-            <span style="font-size: 0.725rem; font-weight: 700; color: var(--eluna-orange); background: #FFF4EB; padding: 0.25rem 0.55rem; border-radius: 4px;" id="badge-vol-keluar">
-              0 Unit Keluar
+        <!-- 6 KARTU RINGKASAN FINANSIAL MAKRO & STOK MAKRO -->
+        <section>
+          <div class="section-header-title">
+            <span>Eksekutif &bull; Ringkasan Valuasi Finansial & Neraca Makro Aset Gudang</span>
+            <span style="font-size: 0.75rem; font-weight: 700; color: #16A34A; background: #DCFCE7; padding: 0.2rem 0.6rem; border-radius: 4px;">
+              Mata Uang: Rupiah (IDR)
             </span>
           </div>
-          <div class="chart-container-box">
-            <canvas id="chartDistribusiKabKota"></canvas>
-          </div>
-        </div>
 
-      </section>
+          <div class="kalak-cards-grid">
+            <!-- 1. Nilai Penerimaan (Rp) -->
+            <div class="card-kalak-financial" style="--stripe-color: #10B981;">
+              <div class="card-kalak-title">Nilai Penerimaan Aset</div>
+              <div class="card-kalak-value" id="kpi-kalak-nilai-penerimaan" style="color: #10B981;">Rp 0</div>
+              <div class="card-kalak-footer">
+                <span id="kpi-kalak-bast-count">200 BAST Masuk</span>
+                <span style="color: #10B981; font-weight: 700;">+ Masuk</span>
+              </div>
+            </div>
 
-      <!-- MODUL PENGAWASAN KADALUWARSA DINAMIS (PARAMETER X HARI) -->
-      <section class="kadaluwarsa-card-official" id="sec-kadaluwarsa">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-          <div>
-            <h4 style="font-size: 1rem; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 0.45rem;">
-              <i data-lucide="clock" style="color: #DC2626; width: 18px; height: 18px;"></i>
-              Status Pengawasan Kadaluwarsa Barang Logistik
-            </h4>
-          </div>
-          <div style="display: flex; gap: 0.5rem;">
-            <span class="badge-status-exp expired" id="badge-summary-exp">0 Kadaluwarsa</span>
-            <span class="badge-status-exp warning" id="badge-summary-warn">0 Warning (&le; X)</span>
-          </div>
-        </div>
+            <!-- 2. Nilai Distribusi (Rp) -->
+            <div class="card-kalak-financial" style="--stripe-color: var(--eluna-orange);">
+              <div class="card-kalak-title">Nilai Distribusi Penguatan</div>
+              <div class="card-kalak-value" id="kpi-kalak-nilai-distribusi" style="color: var(--eluna-orange);">Rp 0</div>
+              <div class="card-kalak-footer">
+                <span id="kpi-kalak-sj-count">50 Surat Jalan</span>
+                <span style="color: var(--eluna-orange); font-weight: 700;">- Keluar</span>
+              </div>
+            </div>
 
-        <!-- Filter Parameter X Hari & Tab Status -->
-        <div class="kadaluwarsa-filter-bar">
-          <div class="param-x-controls">
-            <span>Tetapkan Ambang Batas Peringatan (X):</span>
-            <input type="number" class="input-x-styled" id="input-param-x" min="1" max="180" value="30" onchange="changeParamX(this.value)">
-            <span>Hari Sebelum Tanggal Kadaluwarsa Asli</span>
+            <!-- 3. Nilai Stok Akhir Gudang (Rp) -->
+            <div class="card-kalak-financial" style="--stripe-color: #0E63AA;">
+              <div class="card-kalak-title">Nilai Stok Akhir Gudang</div>
+              <div class="card-kalak-value" id="kpi-kalak-nilai-stok-akhir" style="color: #0E63AA;">Rp 0</div>
+              <div class="card-kalak-footer">
+                <span id="kpi-kalak-stok-awal-note">Awal: Rp 3,95 M</span>
+                <span style="color: #0E63AA; font-weight: 700;">Valuasi Fisik</span>
+              </div>
+            </div>
+
+            <!-- 4. Nilai Penambahan Stok (Koreksi +) -->
+            <div class="card-kalak-financial" style="--stripe-color: #3B82F6;">
+              <div class="card-kalak-title">Penambahan Stok (Koreksi +)</div>
+              <div class="card-kalak-value" id="kpi-kalak-koreksi-tambah" style="color: #3B82F6;">Rp 450.000.000</div>
+              <div class="card-kalak-footer">
+                <span>Opname Fisik / Hibah</span>
+                <span style="color: #3B82F6; font-weight: 700;">+ Koreksi</span>
+              </div>
+            </div>
+
+            <!-- 5. Nilai Pengurangan Stok (Koreksi -) -->
+            <div class="card-kalak-financial" style="--stripe-color: #EF4444;">
+              <div class="card-kalak-title">Pengurangan Stok (Koreksi -)</div>
+              <div class="card-kalak-value" id="kpi-kalak-koreksi-kurang" style="color: #EF4444;">Rp 285.000.000</div>
+              <div class="card-kalak-footer">
+                <span>Penyusutan / Kadaluwarsa</span>
+                <span style="color: #EF4444; font-weight: 700;">- Koreksi</span>
+              </div>
+            </div>
+
+            <!-- 6. SKU Mendekati Kedaluwarsa -->
+            <div class="card-kalak-financial" style="--stripe-color: #DC2626;">
+              <div class="card-kalak-title">SKU Mendekati Kedaluwarsa</div>
+              <div class="card-kalak-value" id="kpi-kalak-sku-exp" style="color: #DC2626;">7 SKU</div>
+              <div class="card-kalak-footer">
+                <span id="kpi-kalak-exp-val-risk">Potensi Risiko Aset</span>
+                <span style="color: #DC2626; font-weight: 700;">Perhatian</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DUA GRAFIK UTAMA FINANSIAL KALAK -->
+        <section class="charts-grid-official">
+          <!-- GRAFIK 1: NILAI BERDASARKAN SUMBER ANGGARAN (APBD, APBN, CSR) -->
+          <div class="chart-card-official">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+              <div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B;">Aliran Nilai Berdasarkan Sumber Anggaran</h4>
+                <p style="font-size: 0.75rem; color: #64748B;">Perbandingan Nilai Masuk vs Nilai Distribusi (Rupiah)</p>
+              </div>
+              <span style="font-size: 0.725rem; font-weight: 700; color: #16A34A; background: #DCFCE7; padding: 0.25rem 0.55rem; border-radius: 4px;">
+                APBD &bull; APBN &bull; CSR
+              </span>
+            </div>
+            <div class="chart-container-box" style="height: 380px;">
+              <canvas id="chartKalakSumberAnggaran"></canvas>
+            </div>
           </div>
 
-          <div style="display: flex; gap: 0.45rem;">
-            <button class="btn-arsip" onclick="filterKadaluwarsaTab('semua')" id="btn-tab-semua" style="height: 32px; padding: 0 0.75rem;">Semua</button>
-            <button class="btn-arsip" onclick="filterKadaluwarsaTab('expired')" id="btn-tab-expired" style="height: 32px; padding: 0 0.75rem; color: #DC2626;">🔴 Kadaluwarsa</button>
-            <button class="btn-arsip" onclick="filterKadaluwarsaTab('warning')" id="btn-tab-warning" style="height: 32px; padding: 0 0.75rem; color: #D97706;">🟡 Warning (&le; X)</button>
-            <button class="btn-arsip" onclick="filterKadaluwarsaTab('aman')" id="btn-tab-aman" style="height: 32px; padding: 0 0.75rem; color: #16A34A;">🟢 Aman</button>
+          <!-- GRAFIK 2: EVALUASI NILAI INDIKATIF PER KAB/KOTA -->
+          <div class="chart-card-official">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+              <div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B;">Evaluasi Nilai Indikatif Logistik per Kab/Kota</h4>
+                <p style="font-size: 0.75rem; color: #64748B;">Nilai Permohonan vs Pagu Alokasi vs Realisasi Distribusi Riil</p>
+              </div>
+              <span style="font-size: 0.725rem; font-weight: 700; color: #0E63AA; background: #E0F2FE; padding: 0.25rem 0.55rem; border-radius: 4px;">
+                Top 10 Daerah Prioritas
+              </span>
+            </div>
+            <div class="chart-container-box" style="height: 380px;">
+              <canvas id="chartKalakNilaiIndikatifDaerah"></canvas>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Tabel Rincian Barang Kadaluwarsa -->
-        <div class="official-table-wrapper" style="max-height: 320px;">
-          <table class="official-table">
-            <thead>
-              <tr>
-                <th style="width: 120px;">Kode Barang</th>
-                <th>Nama Barang Logpal</th>
-                <th style="width: 120px;">Kategori</th>
-                <th style="width: 110px;" class="text-right">Stok Fisik</th>
-                <th style="width: 140px;">Tgl Kadaluwarsa Asli</th>
-                <th style="width: 120px;" class="text-center">Sisa Hari</th>
-                <th style="width: 180px;">Status Kelayakan</th>
-                <th>Lokasi Gudang</th>
-              </tr>
-            </thead>
-            <tbody id="tbody-kadaluwarsa">
-              <!-- Diisi dinamis -->
-            </tbody>
-          </table>
-        </div>
-      </section>
+        <!-- BAGIAN BAWAH: NERACA NILAI STOK PER KATEGORI BARANG (LAPORAN FINANSIAL RESMI) -->
+        <section style="margin-top: 1.75rem;">
+          <div class="data-table-card">
+            <div class="table-card-header">
+              <div>
+                <h3 class="table-title">Neraca Nilai Persediaan Logistik per Kategori Barang (Laporan Akuntansi Aset)</h3>
+                <p class="table-subtitle">Pertanggungjawaban keselarasan nilai finansial: Stok Awal + Penerimaan &plusmn; Koreksi - Distribusi = Stok Akhir</p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="badge-status-pemenuhan aman">
+                  <i data-lucide="check-circle" style="width: 13px; height: 13px;"></i>
+                  Status Neraca Seimbang
+                </span>
+              </div>
+            </div>
 
-      <!-- TABEL RIWAYAT TRANSAKSI OPERATOR (DEFAULT 10 INPUTAN TERAKHIR) -->
-      <section class="official-table-card">
-        <div class="official-table-header-bar">
-          <div class="official-table-header-title">
-            <i data-lucide="list-checks" style="color: var(--eluna-orange); width: 18px; height: 18px;"></i>
-            <span id="title-mutasi-tabel">Daftar Inputan Mutasi (10 Terakhir)</span>
+            <div class="neraca-table-wrapper">
+              <table class="neraca-table" id="table-neraca-kalak">
+                <thead>
+                  <tr>
+                    <th style="width: 48px;">No</th>
+                    <th>Kategori Logistik</th>
+                    <th style="text-align: right;">Nilai Stok Awal (Rp)</th>
+                    <th style="text-align: right;">Penerimaan Masuk (+) (Rp)</th>
+                    <th style="text-align: right;">Koreksi Penyesuaian (&plusmn;) (Rp)</th>
+                    <th style="text-align: right;">Distribusi Keluar (-) (Rp)</th>
+                    <th style="text-align: right;">Nilai Stok Akhir (Rp)</th>
+                    <th style="text-align: center; width: 130px;">Porsi Aset (%)</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-neraca-kalak">
+                  <!-- Diisi secara dinamis oleh JavaScript -->
+                </tbody>
+                <tfoot id="tfoot-neraca-kalak">
+                  <!-- Baris Total Keseimbangan Neraca -->
+                </tfoot>
+              </table>
+            </div>
+
+            <div class="table-footer-pagination" style="justify-content: space-between;">
+              <span style="font-size: 0.8rem; color: #16A34A; font-weight: 700;">
+                Formula Valid: Stok Akhir = Stok Awal + Penerimaan + Koreksi(+) - Koreksi(-) - Distribusi
+              </span>
+              <span style="font-size: 0.75rem; color: #64748B;">
+                Disahkan untuk Pelaporan Berkala Kepala Pelaksana BPBD Provinsi Jawa Barat
+              </span>
+            </div>
           </div>
-          <div class="mutasi-tab-filters">
-            <button class="btn-filter-mutasi active" id="tab-mutasi-all" onclick="setMutasiTypeFilter('all')">Semua Mutasi</button>
-            <button class="btn-filter-mutasi" id="tab-mutasi-masuk" onclick="setMutasiTypeFilter('masuk')">Masuk Saja (BAST)</button>
-            <button class="btn-filter-mutasi" id="tab-mutasi-keluar" onclick="setMutasiTypeFilter('keluar')">Keluar Saja (SJ)</button>
-          </div>
-        </div>
+        </section>
 
-        <div class="official-table-wrapper">
-          <table class="official-table">
-            <thead>
-              <tr>
-                <th style="width: 45px;" class="text-center">No</th>
-                <th style="width: 130px;">Tanggal Input</th>
-                <th style="width: 150px;">No. Dokumen</th>
-                <th style="width: 110px;">Jenis</th>
-                <th style="width: 120px;">Kategori</th>
-                <th>Uraian Barang</th>
-                <th style="width: 110px;" class="text-right">Jumlah</th>
-                <th>Asal Sumber / Kab-Kota Tujuan</th>
-              </tr>
-            </thead>
-            <tbody id="tbody-mutasi-operator">
-              <!-- Diisi dinamis 10 baris terakhir -->
-            </tbody>
-          </table>
-        </div>
-      </section>
+      </div>
 
     </main>
 
   </div>
 
-  <!-- MODAL BAST PENERIMAAN (MASUK) -->
-  <dialog id="modal-bast">
-    <div class="modal-header-official">
-      <span>Input Penerimaan Barang (BAST Masuk)</span>
-      <button onclick="closeModal('modal-bast')" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 1.15rem;">&times;</button>
-    </div>
-    <form method="dialog" onsubmit="submitBAST(event)">
-      <div class="modal-body-official">
-        <div style="margin-bottom: 0.85rem;">
-          <label class="form-label-official">Nomor Dokumen BAST</label>
-          <input type="text" class="form-input-official" id="form-bast-no" value="BAST-2026-X-0042" style="width: 100%;" required>
+  <!-- MODAL POP-UP STOK EKSISTING LOGISTIK (DRILL-DOWN SUMBER DANA & EXCLUDE KADALUWARSA) -->
+  <div class="modal-overlay" id="modal-stok-eksisting" onclick="handleModalBackdropClick(event)">
+    <div class="modal-box-large">
+      <div class="modal-header-official">
+        <div class="modal-header-title">
+          <i data-lucide="boxes" style="width: 22px; height: 22px;"></i>
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0;">Rincian Stok Logistik Eksisting Gudang BPBD Jawa Barat</h3>
+              <span id="modal-active-period-label" style="font-size: 0.725rem; background: rgba(255,255,255,0.22); color: #FFFFFF; padding: 0.2rem 0.55rem; border-radius: 4px; font-weight: 600;">Periode: -</span>
+            </div>
+            <span style="font-size: 0.75rem; opacity: 0.9;">Berdasarkan Stok Awal (Periode Lalu) + Penerimaan (Periode Terpilih) - Pengeluaran (Periode Terpilih)</span>
+          </div>
         </div>
-        <div style="margin-bottom: 0.85rem;">
-          <label class="form-label-official">Kategori Barang</label>
-          <select class="form-input-official" id="form-bast-kat" style="width: 100%;" required>
-            <option value="Pangan">Pangan</option>
-            <option value="Sandang">Sandang</option>
-            <option value="Papan">Papan</option>
-            <option value="Logistik Lainnya">Logistik Lainnya</option>
-          </select>
-        </div>
-        <div style="margin-bottom: 0.85rem;">
-          <label class="form-label-official">Uraian / Nama Barang</label>
-          <input type="text" class="form-input-official" id="form-bast-item" placeholder="Contoh: Paket Makanan Siap Saji" style="width: 100%;" required>
-        </div>
-        <div style="margin-bottom: 0.85rem;">
-          <label class="form-label-official">Jumlah Kuantitas Masuk</label>
-          <input type="number" class="form-input-official" id="form-bast-qty" min="1" placeholder="Contoh: 1500" style="width: 100%;" required>
-        </div>
-        <div style="margin-bottom: 0.85rem;">
-          <label class="form-label-official">Asal Sumber Bantuan</label>
-          <input type="text" class="form-input-official" id="form-bast-asal" value="Gudang Logistik BNPB Pusat" style="width: 100%;" required>
-        </div>
+        <button class="modal-close-btn" onclick="closeModalStokEksisting()" title="Tutup Jendela">&times;</button>
       </div>
-      <div class="modal-footer-official">
-        <button type="button" class="btn-arsip" onclick="closeModal('modal-bast')">Batal</button>
-        <button type="submit" class="btn-tampilkan">Simpan Penerimaan</button>
-      </div>
-    </form>
-  </dialog>
 
-  <!-- MODAL SURAT JALAN DISTRIBUSI (KELUAR) -->
-  <dialog id="modal-sj">
-    <div class="modal-header-official">
-      <span>Input Distribusi Barang (Surat Jalan Keluar)</span>
-      <button onclick="closeModal('modal-sj')" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 1.15rem;">&times;</button>
+      <div class="modal-body-scrollable">
+        <!-- Info Strip & Ringkasan -->
+        <div class="modal-info-strip">
+          <div>
+            <span style="font-weight: 700; color: #1E293B; font-size: 0.85rem;">Status Kesiapsiagaan Logistik Layak Pakai:</span>
+            <div style="font-size: 0.775rem; color: #64748B; margin-top: 2px;">
+              Barang yang telah melewati tanggal kadaluwarsa otomatis tidak dihitung dalam sisa stok layak pakai. Klik baris barang untuk melihat rincian sumber dana (APBD, APBN, CSR).
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <span class="badge-row-counter" style="background: #DCFCE7; color: #16A34A; font-size: 0.8rem; padding: 0.35rem 0.75rem;" id="modal-badge-stok-layak">
+              0 Unit Layak Pakai
+            </span>
+            <span class="badge-exp-exclude" style="padding: 0.35rem 0.65rem;" id="modal-badge-kadaluwarsa-exclude">
+              0 Unit Kadaluwarsa (Exclude)
+            </span>
+          </div>
+        </div>
+
+        <!-- Filter & Search Controls inside Modal -->
+        <div class="modal-filter-bar">
+          <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;" id="modal-category-filter-buttons">
+            <button class="btn-filter-mutasi active" onclick="filterModalKategori('all', this)">Semua Kategori (20 Barang)</button>
+            <button class="btn-filter-mutasi" onclick="filterModalKategori('Pangan', this)">Pangan</button>
+            <button class="btn-filter-mutasi" onclick="filterModalKategori('Sandang', this)">Sandang</button>
+            <button class="btn-filter-mutasi" onclick="filterModalKategori('Papan', this)">Papan</button>
+            <button class="btn-filter-mutasi" onclick="filterModalKategori('Logistik Lainnya', this)">Logistik Lainnya</button>
+          </div>
+          <div>
+            <input type="text" class="modal-search-input" id="input-search-stok-modal" placeholder="Cari nama komoditas barang..." oninput="handleModalSearch(this.value)">
+          </div>
+        </div>
+
+        <!-- Tabel Stok Master Barang (Level 1) - Diperbesar & Lega -->
+        <div class="official-table-wrapper" style="min-height: 520px; max-height: calc(92vh - 230px);">
+          <table class="official-table">
+            <thead>
+              <tr>
+                <th style="width: 45px;" class="text-center">No</th>
+                <th>Nama Komoditas Barang</th>
+                <th style="width: 120px;">Kategori</th>
+                <th style="width: 100px;" class="text-right">Stok Awal</th>
+                <th style="width: 100px;" class="text-right">Masuk (+)</th>
+                <th style="width: 100px;" class="text-right">Keluar (-)</th>
+                <th style="width: 110px;" class="text-right">Kadaluwarsa</th>
+                <th style="width: 130px;" class="text-right">Sisa Stok Layak</th>
+                <th style="width: 130px;" class="text-center">Rincian Sumber</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-modal-stok-master">
+              <!-- Diisi dinamis oleh JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <form method="dialog" onsubmit="submitSJ(event)">
-      <div class="modal-body-official">
-        <div style="margin-bottom: 0.85rem;">
-          <label class="form-label-official">Nomor Surat Jalan (SJ)</label>
-          <input type="text" class="form-input-official" id="form-sj-no" value="SJ-2026-X-0119" style="width: 100%;" required>
-        </div>
-        <div style="margin-bottom: 0.85rem;">
-          <label class="form-label-official">Kabupaten / Kota Tujuan (27 Kab/Kota Jawa Barat)</label>
-          <select class="form-input-official" id="form-sj-tujuan" style="width: 100%;" required>
-            <!-- Diisi otomatis dari 27 kab/kota Jawa Barat -->
-          </select>
-        </div>
-        <div style="margin-bottom: 0.85rem;">
-          <label class="form-label-official">Kategori Barang</label>
-          <select class="form-input-official" id="form-sj-kat" style="width: 100%;" required>
-            <option value="Pangan">Pangan</option>
-            <option value="Sandang">Sandang</option>
-            <option value="Papan">Papan</option>
-            <option value="Logistik Lainnya">Logistik Lainnya</option>
-          </select>
-        </div>
-        <div style="margin-bottom: 0.85rem;">
-          <label class="form-label-official">Uraian / Nama Barang</label>
-          <input type="text" class="form-input-official" id="form-sj-item" placeholder="Contoh: Matras & Selimut Wol" style="width: 100%;" required>
-        </div>
-        <div style="margin-bottom: 0.85rem;">
-          <label class="form-label-official">Jumlah Kuantitas Keluar</label>
-          <input type="number" class="form-input-official" id="form-sj-qty" min="1" placeholder="Contoh: 300" style="width: 100%;" required>
-        </div>
-      </div>
-      <div class="modal-footer-official">
-        <button type="button" class="btn-arsip" onclick="closeModal('modal-sj')">Batal</button>
-        <button type="submit" class="btn-tampilkan">Terbitkan Distribusi</button>
-      </div>
-    </form>
-  </dialog>
+  </div>
 
   <!-- TOAST CONTAINER -->
   <div class="toast-container" id="toast-container"></div>

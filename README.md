@@ -8,16 +8,15 @@ Sistem antarmuka (*dashboard*) pemantauan operasional logistik kebencanaan untuk
 
 ## 🚀 Fitur Utama Dashboard
 
-1. **Integrasi Langsung Berkas Excel (.xlsx)**:
-   * Menggunakan pustaka *SheetJS* (`xlsx.full.min.js`) yang beroperasi 100% secara offline di sisi peramban (*client-side*).
-   * Fitur **Muat Ulang Excel**, **Unggah Excel Kustom**, dan **Unduh Basis Data**.
-   * Indikator status koneksi basis data aktif pada bilah navigasi atas.
+1. **Integrasi Luring Berkas Excel (.xlsx)**:
+   * Menggunakan pustaka *SheetJS* (`xlsx.full.min.js`) yang beroperasi 100% secara luring di sisi peramban (*client-side*).
+   * Otomatis membaca 250 transaksi dari `database_logistik_bpbd_jabar.xlsx`.
+   * Indikator status koneksi basis data aktif pada bilah navigasi atas (mode murni dashboard visual).
 
-2. **Ringkasan Arus Logistik & Kartu Metrik KPI**:
-   * Total Penerimaan Masuk (Unit & Jumlah Dokumen BAST).
-   * Total Distribusi Keluar (Unit & Jumlah Surat Jalan).
-   * Total Saldo Stok Akhir Gudang.
-   * Jumlah Batch Barang Kadaluwarsa & Kategori Peringatan (*Warning*).
+2. **Navigasi Multi-Stakeholder (3 Tampilan Terpadu)**:
+   * **View Operasional (Default)**: Tampilan visual lengkap operasional gudang (Ringkasan arus mutasi BAST/SJ, statistik sumber anggaran & distribusi 27 Kab/Kota, modul pengawasan kadaluwarsa terkalibrasi sisa fisik gudang, tabel dinamis 10 entri mutasi dengan filter silang grafik, dan fitur Pop-Up Stok Eksisting realtime).
+   * **View Kabid (Kepala Bidang Kedaruratan & Logistik)**: Tampilan manajerial kuantitas penguatan logistik tahunan (Permohonan, Realisasi Salur, Kesenjangan Gap, 7 Wilayah Kritis, Bar Chart Status Pemenuhan 27 Wilayah, Gap 4 Kategori, dan tabel drill-down interaktif).
+   * **View Kepala Pelaksana (KALAK BPBD Jabar)**: Tampilan eksekutif strategis valuasi finansial makro Rupiah (Nilai Penerimaan Rp 34,50 M, Nilai Distribusi Rp 4,63 M, Nilai Stok Akhir Rp 33,99 M, Penyesuaian Koreksi ±, Grafik Finansial Sumber Dana & Nilai Indikatif Daerah, serta Tabel Neraca Nilai Persediaan 4 Kategori Barang resmi).
 
 3. **Neraca Stok 4 Kategori Barang Logistik**:
    * Menampilkan neraca stok per 4 kategori resmi: **Sandang, Pangan, Papan, dan Logistik Lainnya**.
@@ -30,7 +29,7 @@ Sistem antarmuka (*dashboard*) pemantauan operasional logistik kebencanaan untuk
    * **Statistik Distribusi ke 27 Kabupaten/Kota**: Visualisasi peringkat alokasi penyaluran logistik ke seluruh daerah rawan bencana di Jawa Barat.
 
 5. **Modul Pengawasan Kadaluwarsa Dinamis**:
-   * Parameter peringatan dini dinamis ($X$ Hari sebelum tanggal kadaluwarsa asli).
+   * Parameter peringatan dini dinamis (X Hari sebelum tanggal kadaluwarsa asli).
    * Filter tab status kelayakan (*Semua, Kadaluwarsa, Warning, Aman*).
 
 6. **Tabel Riwayat Mutasi Operator & Filter**:

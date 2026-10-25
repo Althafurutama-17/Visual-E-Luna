@@ -14,8 +14,14 @@
 // ==========================================
 let currentFilterMode = "default10"; // "default10" | "all" | "filtered"
 let activeTransactions = [];
-let parameterXHari = 30; // Default ambang batas kadaluwarsa (X Hari)
-let activeKadaluwarsaTab = "semua"; // "semua" | "expired" | "warning" | "aman"
+let parameterXHari = 60; // Default ambang batas kadaluwarsa (X Hari) diset ke 60 hari
+let activeKadaluwarsaTab = "kritis"; // "kritis" (Kadaluwarsa & Warning) | "expired" | "warning" | "aman" | "semua"
+
+// State Modal Pop-Up Stok Eksisting
+let modalKategoriFilter = "all";
+let modalSearchKeyword = "";
+let expandedBarangSet = new Set();
+let modalAggregatedStockData = [];
 
 // Chart.js Instances
 let chartPenerimaanInst = null;
@@ -59,13 +65,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     lucide.createIcons();
   }
 
-  // 2. Isi Dropdown 27 Kab/Kota pada Modal Distribusi (SJ)
-  populateSelect27KabKota();
+  // 2. Instant Offline Hydration (Anti-0 ms) dari data.js
+  const initialData = window.ELUNA_OPERATOR_DATA || (typeof ELUNA_OPERATOR_DATA !== "undefined" ? ELUNA_OPERATOR_DATA : null);
+  if (initialData) {
+    window.ELUNA_OPERATOR_DATA = initialData;
+    applyOperatorData();
+    updateDbStatus("connected", `Excel: database_logistik_bpbd_jabar.xlsx (${initialData.riwayatMutasiSemua.length} Transaksi Luring)`);
+  }
 
-  // 3. Muat Data Langsung dari File Excel (Direct Integration)
+  // 3. Muat Data Langsung dari File Excel Biner (Jika berjalan via HTTP/HTTPS)
   await loadExcelDatabaseDirectly();
 
-  console.log("Dashboard Operator E-LUNA Berhasil Diinisialisasi.");
+  console.log("Dashboard E-LUNA Berhasil Diinisialisasi (Murni Visual Dashboard).");
 });
 
 // ==========================================
@@ -74,11 +85,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // Memuat langsung file Excel 'database_logistik_bpbd_jabar.xlsx' dari server
 async function loadExcelDatabaseDirectly() {
-  const syncBtn = document.getElementById("btn-sync-excel");
   const syncIcon = document.getElementById("icon-sync-spin");
-
   if (syncIcon) syncIcon.classList.add("spin-animation");
-  updateDbStatus("loading", "Membaca database_logistik_bpbd_jabar.xlsx...");
 
   try {
     // Fetch file Excel dengan cache-busting timestamp
@@ -91,11 +99,15 @@ async function loadExcelDatabaseDirectly() {
     processExcelWorkbook(arrayBuffer, "database_logistik_bpbd_jabar.xlsx");
     showToast("Berhasil memuat data langsung dari file Excel!");
   } catch (err) {
-    console.warn("Direct Excel fetch gagal, mengaktifkan data lokal fallback:", err);
-    updateDbStatus("fallback", "Menggunakan Data Lokal (Fallback)");
+    console.warn("Direct Excel fetch tidak dapat diakses (normal jika via file:///):", err);
+    // Data lokal sudah aktif melalui Instant Offline Hydration
+    const totalTx = (window.ELUNA_OPERATOR_DATA && window.ELUNA_OPERATOR_DATA.riwayatMutasiSemua) ? window.ELUNA_OPERATOR_DATA.riwayatMutasiSemua.length : 250;
+    updateDbStatus("fallback", `Excel: database_logistik_bpbd_jabar.xlsx (${totalTx} Transaksi Luring)`);
     
-    // Fallback ke data.js jika offline
-    if (window.ELUNA_OPERATOR_DATA) {
+    // Pastikan applyOperatorData terpanggil jika belum
+    const localData = window.ELUNA_OPERATOR_DATA || (typeof ELUNA_OPERATOR_DATA !== "undefined" ? ELUNA_OPERATOR_DATA : null);
+    if (localData && (!activeTransactions || activeTransactions.length === 0)) {
+      window.ELUNA_OPERATOR_DATA = localData;
       applyOperatorData();
     }
   } finally {
@@ -195,6 +207,8 @@ function processExcelWorkbook(arrayBuffer, sourceFilename) {
     const jenis = (masuk > 0) ? "Masuk" : "Keluar";
     const jumlah = (masuk > 0) ? masuk : keluar;
     const asalTujuan = (masuk > 0) ? `Sumber: ${dana}` : `Tujuan: ${tujuan}`;
+    const hargaSatuan = parseInt(r["Harga Satuan (Rp)"] || r["Harga Satuan"] || 0, 10);
+    const nilaiTotal = parseInt(r["Nilai Total (Rp)"] || r["Nilai Total"] || (jumlah * hargaSatuan), 10);
 
     transactions.push({
       id: `TX-${String(idx + 1).padStart(4, "0")}`,
@@ -209,7 +223,9 @@ function processExcelWorkbook(arrayBuffer, sourceFilename) {
       satuan: "Unit/Paket",
       sumberDana: dana,
       asalTujuan: asalTujuan,
-      kabKotaTujuan: (keluar > 0) ? tujuan : "-"
+      kabKotaTujuan: (keluar > 0) ? tujuan : "-",
+      hargaSatuan: hargaSatuan,
+      nilaiTotal: nilaiTotal
     });
   });
 
@@ -227,6 +243,7 @@ function processExcelWorkbook(arrayBuffer, sourceFilename) {
       const kat = (r["Kategori Barang"] || "Pangan").toString().trim();
       const doc = (r["Nomor Dokumen"] || "").toString().trim();
       const tglExpRaw = r["Tanggal Kadaluwarsa"];
+      const harga = parseInt(r["Harga Satuan (Rp)"] || 0, 10);
 
       if (!barang || !tglExpRaw) return;
 
@@ -246,7 +263,9 @@ function processExcelWorkbook(arrayBuffer, sourceFilename) {
         tglKadaluwarsaAsli: parsedExp.tglStr,
         lokasiGudang: "Gudang Induk BPBD Jawa Barat",
         sumber: dana,
-        noDokumen: doc
+        noDokumen: doc,
+        hargaSatuan: harga,
+        nilaiTotal: qtyStok * harga
       });
     });
   }
@@ -254,39 +273,104 @@ function processExcelWorkbook(arrayBuffer, sourceFilename) {
   // 3. Baca Sheet 'Stok Awal'
   const wsAwal = workbook.Sheets["Stok Awal"];
   const stokPerKat = { Sandang: 0, Pangan: 0, Papan: 0, "Logistik Lainnya": 0 };
+  const nilaiAwalPerKat = { Sandang: 0, Pangan: 0, Papan: 0, "Logistik Lainnya": 0 };
+  const daftarStokAwalBarang = [];
   if (wsAwal) {
     const rawAwal = XLSX.utils.sheet_to_json(wsAwal);
     rawAwal.forEach(r => {
-      const kat = r["Kategori Barang"];
+      const kat = (r["Kategori Barang"] || "").toString().trim();
+      const sumber = (r["Sumber Pendanaan"] || "APBD").toString().trim();
+      const barang = (r["Barang"] || "").toString().trim();
       const awal = parseInt(r["Stok Akhir Periode Sebelumnya"] || 0, 10);
+      const harga = parseInt(r["Harga Satuan (Rp)"] || 0, 10);
+      const nilai = parseInt(r["Nilai Total (Rp)"] || (awal * harga), 10);
+
       if (stokPerKat.hasOwnProperty(kat)) {
         stokPerKat[kat] += awal;
+        nilaiAwalPerKat[kat] += nilai;
+      }
+      if (barang) {
+        daftarStokAwalBarang.push({
+          sumber: sumber,
+          barang: barang,
+          kategori: kat,
+          stokAwal: awal,
+          hargaSatuan: harga,
+          nilaiTotal: nilai
+        });
       }
     });
   }
 
+  // 4. Baca Sheet 'Permohonan Daerah'
+  const wsPerm = workbook.Sheets["Permohonan Daerah"];
+  const daftarPermohonanDaerah = [];
+  if (wsPerm) {
+    const rawPerm = XLSX.utils.sheet_to_json(wsPerm);
+    rawPerm.forEach((r, idx) => {
+      const noSurat = (r["Nomor Surat Permohonan"] || "").toString().trim();
+      const thn = parseInt(r["Tahun Anggaran"] || 2026, 10);
+      const tglRaw = r["Tanggal Permohonan"];
+      const pemohon = (r["Kab/Kota Pemohon"] || "").toString().trim();
+      const kat = (r["Kategori Barang"] || "").toString().trim();
+      const barang = (r["Barang"] || "").toString().trim();
+      const qty = parseInt(r["Jumlah Diminta (Unit)"] || 0, 10);
+      const harga = parseInt(r["Estimasi Harga Satuan (Rp)"] || r["Harga Satuan (Rp)"] || 0, 10);
+      const estNilai = parseInt(r["Estimasi Nilai Total (Rp)"] || (qty * harga), 10);
+
+      if (!pemohon || !barang || noSurat.startsWith("TOTAL")) return;
+
+      const parsedTgl = parseExcelDateValue(tglRaw);
+
+      daftarPermohonanDaerah.push({
+        id: `REQ-${String(idx + 1).padStart(4, "0")}`,
+        noSurat: noSurat,
+        tahunAnggaran: thn,
+        tanggalPermohonan: parsedTgl.tglStr,
+        kabKota: pemohon,
+        kategori: kat,
+        barang: barang,
+        jumlahDiminta: qty,
+        hargaSatuan: harga,
+        estimasiNilai: estNilai
+      });
+    });
+  }
+
   // Perbarui state global aplikasi
+  const existingRekap = (window.ELUNA_OPERATOR_DATA && window.ELUNA_OPERATOR_DATA.rekapFinansialMakro) || null;
   window.ELUNA_OPERATOR_DATA = {
     metadata: {
-      systemName: "E-LUNA OPERATOR GUDANG",
-      subTitle: "Sistem Pemantauan Operasional Logistik Kebencanaan",
+      systemName: "E-LUNA LOGISTIK BPBD JAWA BARAT",
+      subTitle: "Sistem Informasi & Pemantauan Operasional Logistik Kebencanaan",
       instansi: "BPBD Provinsi Jawa Barat",
       gudangAktif: "Gudang Logistik & Peralatan Provinsi Jawa Barat",
       lokasi: "Jl. Soekarno-Hatta No. 629, Kota Bandung",
       petugas: "Nadhif Althafu Rutama",
       tanggalAcuanSistem: "2026-10-03",
-      parameterXDefaultHari: 30,
+      parameterXDefaultHari: 60,
       sourceDatabase: sourceFilename,
-      totalEntries: transactions.length
+      totalEntries: transactions.length,
+      fokusOperasional: "Penguatan Cadangan Logistik Kesiapsiagaan Daerah Tahunan"
     },
     kategoriMaster: [
-      { id: "sandang", nama: "Sandang", deskripsi: "Selimut, Matras, Sarung, Pakaian Dewasa, Pakaian Anak", color: "#8B5CF6", bgLight: "#F5F3FF", stokAwal: stokPerKat["Sandang"] || 53400, satuan: "Unit/Paket" },
-      { id: "pangan", nama: "Pangan", deskripsi: "Beras, Makanan Siap Saji, Susu Formula, Biskuit, Lauk Pauk, Air Mineral", color: "#3B82F6", bgLight: "#EFF6FF", stokAwal: stokPerKat["Pangan"] || 210000, satuan: "Unit/Paket" },
-      { id: "papan", nama: "Papan", deskripsi: "Tenda Pengungsi, Tenda Keluarga, Terpal, Seng", color: "#F97316", bgLight: "#FFF7ED", stokAwal: stokPerKat["Papan"] || 21600, satuan: "Unit" },
-      { id: "lainnya", nama: "Logistik Lainnya", deskripsi: "Perahu Karet, Genset, Chainsaw, Family Kit, Sanitasi Kit", color: "#10B981", bgLight: "#ECFDF5", stokAwal: stokPerKat["Logistik Lainnya"] || 16890, satuan: "Unit/Paket" }
+      { id: "sandang", nama: "Sandang", deskripsi: "Selimut, Matras, Sarung, Pakaian Dewasa, Pakaian Anak", color: "#8B5CF6", bgLight: "#F5F3FF", stokAwal: stokPerKat["Sandang"] || 5340, nilaiStokAwal: nilaiAwalPerKat["Sandang"], satuan: "Unit/Paket" },
+      { id: "pangan", nama: "Pangan", deskripsi: "Beras, Makanan Siap Saji, Susu Formula, Biskuit, Lauk Pauk, Air Mineral", color: "#3B82F6", bgLight: "#EFF6FF", stokAwal: stokPerKat["Pangan"] || 21000, nilaiStokAwal: nilaiAwalPerKat["Pangan"], satuan: "Unit/Paket" },
+      { id: "papan", nama: "Papan", deskripsi: "Tenda Pengungsi, Tenda Keluarga, Terpal, Seng", color: "#F97316", bgLight: "#FFF7ED", stokAwal: stokPerKat["Papan"] || 2160, nilaiStokAwal: nilaiAwalPerKat["Papan"], satuan: "Unit" },
+      { id: "lainnya", nama: "Logistik Lainnya", deskripsi: "Perahu Karet, Genset, Chainsaw, Family Kit, Sanitasi Kit", color: "#10B981", bgLight: "#ECFDF5", stokAwal: stokPerKat["Logistik Lainnya"] || 1689, nilaiStokAwal: nilaiAwalPerKat["Logistik Lainnya"], satuan: "Unit/Paket" }
     ],
     kabKotaJabar: DAFTAR_27_KAB_KOTA_JABAR,
+    rekapFinansialMakro: existingRekap || {
+      totalNilaiStokAwal: 3950000000,
+      totalNilaiPenerimaan: 34497500000,
+      totalNilaiDistribusi: 4630500000,
+      koreksiTambahRp: 450000000,
+      koreksiKurangRp: 285000000,
+      totalNilaiStokAkhir: 33990800000
+    },
+    daftarStokAwalPerBarang: daftarStokAwalBarang,
     daftarBarangKadaluwarsa: expItems,
+    daftarPermohonanDaerah: daftarPermohonanDaerah.length > 0 ? daftarPermohonanDaerah : ((window.ELUNA_OPERATOR_DATA && window.ELUNA_OPERATOR_DATA.daftarPermohonanDaerah) || []),
     riwayatMutasiSemua: transactions
   };
 
@@ -305,6 +389,12 @@ function applyOperatorData() {
   populateFilterDropdowns();
   setFilterMode(currentFilterMode);
   renderKadaluwarsaModul();
+
+  if (currentDashboardView === "kabid") {
+    renderKabidView();
+  } else if (currentDashboardView === "kalak") {
+    renderKalakView();
+  }
 }
 
 // Update Status Pill di Navbar Atas
@@ -325,40 +415,57 @@ function updateDbStatus(type, label) {
   txt.textContent = label;
 }
 
-// Trigger Input File Excel
-function triggerExcelUpload() {
-  const inp = document.getElementById("input-excel-file");
-  if (inp) inp.click();
-}
+// ==========================================
+// CONTROLLER SWITCH VIEW MULTI-STAKEHOLDER
+// ==========================================
+let currentDashboardView = "operasional"; // "operasional" | "kabid" | "kalak"
 
-// Handler Saat Pengguna Memilih / Mengunggah File Excel dari Komputer
-function handleExcelFileUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+function switchDashboardView(viewKey) {
+  currentDashboardView = viewKey;
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = new Uint8Array(e.target.result);
-      processExcelWorkbook(data, file.name);
-      showToast(`File Excel '${file.name}' berhasil dimuat ke Dashboard!`);
-    } catch (err) {
-      console.error("Gagal membaca file Excel yang diunggah:", err);
-      alert(`Gagal membaca file Excel: ${err.message}`);
+  // 1. Update status aktif sidebar item
+  const navOperasional = document.getElementById("nav-view-operasional");
+  const navKabid = document.getElementById("nav-view-kabid");
+  const navKalak = document.getElementById("nav-view-kalak");
+
+  if (navOperasional) navOperasional.classList.toggle("active", viewKey === "operasional");
+  if (navKabid) navKabid.classList.toggle("active", viewKey === "kabid");
+  if (navKalak) navKalak.classList.toggle("active", viewKey === "kalak");
+
+  // 2. Switch container visibility
+  const cOperasional = document.getElementById("container-view-operasional");
+  const cKabid = document.getElementById("container-view-kabid");
+  const cKalak = document.getElementById("container-view-kalak");
+
+  if (cOperasional) cOperasional.style.display = (viewKey === "operasional") ? "block" : "none";
+  if (cKabid) cKabid.style.display = (viewKey === "kabid") ? "block" : "none";
+  if (cKalak) cKalak.style.display = (viewKey === "kalak") ? "block" : "none";
+
+  // 3. Update judul halaman
+  const pageTitle = document.getElementById("page-main-title");
+  if (pageTitle) {
+    if (viewKey === "operasional") {
+      pageTitle.textContent = "Dashboard Operasional Logistik";
+    } else if (viewKey === "kabid") {
+      pageTitle.textContent = "Executive View: Kepala Bidang Kedaruratan & Logistik";
+    } else if (viewKey === "kalak") {
+      pageTitle.textContent = "Strategic View: Kepala Pelaksana BPBD Provinsi Jawa Barat";
     }
-  };
-  reader.readAsArrayBuffer(file);
-}
+  }
 
-// Unduh File Excel Langsung dari Dashboard
-function downloadExcelDatabase() {
-  const link = document.createElement("a");
-  link.href = "database_logistik_bpbd_jabar.xlsx";
-  link.download = "database_logistik_bpbd_jabar.xlsx";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  showToast("Mengunduh file 'database_logistik_bpbd_jabar.xlsx'...");
+  // 4. Trigger View Rendering Khusus
+  if (viewKey === "kabid") {
+    renderKabidView();
+  } else if (viewKey === "kalak") {
+    renderKalakView();
+  }
+
+  // 5. Refresh Lucide Icons
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+
+  showToast(`Beralih ke tampilan: ${pageTitle ? pageTitle.textContent : viewKey}`);
 }
 
 // ==========================================
@@ -479,55 +586,64 @@ function populateFilterDropdowns() {
   }
 }
 
-// State dan Handler Filter Mutasi (Semua / Masuk Saja / Keluar Saja)
-let currentMutasiTypeFilter = "all";
+// ==========================================
+// 3.1 STATE & CONTROLLER FILTER INTERAKTIF BAR CHART (CROSS-FILTERING)
+// ==========================================
+const activeChartFilter = {
+  sumberAnggaran: null, // null | "APBD" | "APBN" | "CSR"
+  kabKota: null,        // null | "Kota Bandung" | ...
+  jenis: "all"          // "all" | "masuk" | "keluar"
+};
 
-function setMutasiTypeFilter(type) {
-  currentMutasiTypeFilter = type;
+// Handler saat Bar pada Grafik diklik
+function handleChartBarClick(filterType, val) {
+  if (filterType === "sumberAnggaran") {
+    if (activeChartFilter.sumberAnggaran === val) {
+      activeChartFilter.sumberAnggaran = null; // Toggle off
+      showToast(`Filter sumber ${val} dinonaktifkan`);
+    } else {
+      activeChartFilter.sumberAnggaran = val;
+      showToast(`Menyaring transaksi Sumber Anggaran: ${val}`);
+    }
+  } else if (filterType === "kabKota") {
+    const cleanVal = cleanKabKotaName(val);
+    if (activeChartFilter.kabKota === cleanVal) {
+      activeChartFilter.kabKota = null; // Toggle off
+      showToast(`Filter wilayah ${cleanVal} dinonaktifkan`);
+    } else {
+      activeChartFilter.kabKota = cleanVal;
+      showToast(`Menyaring distribusi tujuan: ${cleanVal}`);
+    }
+  }
 
-  const tabAll = document.getElementById("tab-mutasi-all");
-  const tabIn = document.getElementById("tab-mutasi-masuk");
-  const tabOut = document.getElementById("tab-mutasi-keluar");
+  // Update visualisasi bar yang dipilih (terang/redup)
+  updateChartHighlighting();
+  // Render ulang tabel dinamis
+  renderDynamicTable();
+}
+
+// Reset semua filter grafik (tombol Reset)
+function resetChartFilters() {
+  activeChartFilter.sumberAnggaran = null;
+  activeChartFilter.kabKota = null;
+  updateChartHighlighting();
+  renderDynamicTable();
+  showToast("Filter grafik telah direset ke seluruh data");
+}
+
+// Handler filter jenis mutasi pada Tabel Dinamis (Semua / Masuk Saja / Keluar Saja)
+function setDynamicTypeFilter(type) {
+  activeChartFilter.jenis = type;
+
+  const tabAll = document.getElementById("tab-dyn-all");
+  const tabIn = document.getElementById("tab-dyn-masuk");
+  const tabOut = document.getElementById("tab-dyn-keluar");
+
   if (tabAll) tabAll.classList.toggle("active", type === "all");
   if (tabIn) tabIn.classList.toggle("active", type === "masuk");
   if (tabOut) tabOut.classList.toggle("active", type === "keluar");
 
-  renderActiveMutasiTable();
-}
-
-function renderActiveMutasiTable() {
-  if (!window.ELUNA_OPERATOR_DATA) return;
-  const titleMutasi = document.getElementById("title-mutasi-tabel");
-  let txToShow = [];
-
-  if (currentFilterMode === "default10") {
-    const allTx = ELUNA_OPERATOR_DATA.riwayatMutasiSemua;
-    if (currentMutasiTypeFilter === "all") {
-      txToShow = allTx.slice(0, 10);
-      if (titleMutasi) titleMutasi.textContent = "Daftar Inputan Mutasi (10 Terakhir)";
-    } else if (currentMutasiTypeFilter === "masuk") {
-      txToShow = allTx.filter(t => t.jenis === "Masuk").slice(0, 10);
-      if (titleMutasi) titleMutasi.textContent = "Daftar Inputan Mutasi (10 Masuk Terakhir)";
-    } else if (currentMutasiTypeFilter === "keluar") {
-      txToShow = allTx.filter(t => t.jenis === "Keluar").slice(0, 10);
-      if (titleMutasi) titleMutasi.textContent = "Daftar Inputan Mutasi (10 Keluar Terakhir)";
-    }
-  } else {
-    // Mode 'all' atau 'filtered'
-    const baseTx = activeTransactions;
-    if (currentMutasiTypeFilter === "masuk") {
-      txToShow = baseTx.filter(t => t.jenis === "Masuk");
-      if (titleMutasi) titleMutasi.textContent = `Daftar Inputan Mutasi Masuk (${txToShow.length} Baris)`;
-    } else if (currentMutasiTypeFilter === "keluar") {
-      txToShow = baseTx.filter(t => t.jenis === "Keluar");
-      if (titleMutasi) titleMutasi.textContent = `Daftar Inputan Mutasi Keluar (${txToShow.length} Baris)`;
-    } else {
-      txToShow = baseTx;
-      if (titleMutasi) titleMutasi.textContent = `Daftar Inputan Mutasi (${txToShow.length} Baris)`;
-    }
-  }
-
-  renderMutasiOperatorTable(txToShow);
+  renderDynamicTable();
 }
 
 // ==========================================
@@ -578,6 +694,7 @@ function updateDashboardCore() {
   const elKeluar = document.getElementById("kpi-total-keluar");
   const elSj = document.getElementById("kpi-sj-count");
   const elStok = document.getElementById("kpi-total-stok-akhir");
+  const elStokAwal = document.getElementById("kpi-stok-awal-note");
 
   if (elMasuk) elMasuk.textContent = totalMasukUnit.toLocaleString("id-ID");
   if (elBast) elBast.textContent = `${countBast} Dokumen BAST`;
@@ -587,7 +704,9 @@ function updateDashboardCore() {
 
   // 2. Hitung Neraca Stok 4 Kategori: Stok Akhir = Stok Awal (Konstan) + Masuk - Keluar
   let totalAkumulasiStokAkhir = 0;
+  let totalStokAwalBasis = 0;
   const neracaData = ELUNA_OPERATOR_DATA.kategoriMaster.map(km => {
+    totalStokAwalBasis += (km.stokAwal || 0);
     const m = katMutasi[km.id] || { masuk: 0, keluar: 0 };
     const stokAkhir = km.stokAwal + m.masuk - m.keluar;
     totalAkumulasiStokAkhir += stokAkhir;
@@ -600,54 +719,49 @@ function updateDashboardCore() {
   });
 
   if (elStok) elStok.textContent = totalAkumulasiStokAkhir.toLocaleString("id-ID");
+  if (elStokAwal) {
+    elStokAwal.textContent = `Stok Awal: ${totalStokAwalBasis.toLocaleString("id-ID")} Unit`;
+    elStokAwal.title = `Rumus Neraca: Stok Awal (${totalStokAwalBasis.toLocaleString("id-ID")}) + Masuk (${totalMasukUnit.toLocaleString("id-ID")}) - Keluar (${totalKeluarUnit.toLocaleString("id-ID")}) = Stok Akhir (${totalAkumulasiStokAkhir.toLocaleString("id-ID")})`;
+  }
 
-  // 3. Render Komponen & Grafik
-  renderNeracaStokCards(neracaData);
+  // 3. Render Komponen Visualisasi & Tabel Dinamis
   renderVisualisasiCharts(neracaData, kabKotaVolumeMap, totalMasukUnit, totalKeluarUnit);
-  renderActiveMutasiTable();
+  renderDynamicTable();
+
+  // 4. Render Stakeholder Multi-Views (Kabid & Kalak)
+  renderKabidView(neracaData, totalAkumulasiStokAkhir, countSj, totalKeluarUnit);
+  renderKalakView(neracaData, totalAkumulasiStokAkhir);
 
   if (window.lucide) {
     lucide.createIcons();
   }
 }
 
-// ==========================================
-// 5. NERACA STOK 4 KATEGORI (STOK AWAL + MASUK - KELUAR = STOK AKHIR)
-// ==========================================
-function renderNeracaStokCards(neracaList) {
-  const container = document.getElementById("neraca-grid-container");
-  if (!container) return;
+// State Cache untuk Memperbarui Sorotan Grafik (Highlighting)
+let lastChartDataCache = {
+  neracaList: [],
+  kabKotaMap: {},
+  totalMasuk: 0,
+  totalKeluar: 0
+};
 
-  container.innerHTML = neracaList.map(item => `
-    <div class="neraca-kategori-box">
-      <div class="neraca-kat-title">
-        <span>${item.nama}</span>
-        <span style="font-size: 0.725rem; color: #64748B; font-weight: 500;">${item.satuan}</span>
-      </div>
-      <div class="neraca-row">
-        <span>Stok Awal:</span>
-        <strong style="color: #334155;">${item.stokAwal.toLocaleString("id-ID")}</strong>
-      </div>
-      <div class="neraca-row" style="color: #10B981;">
-        <span>(+) Penerimaan:</span>
-        <strong>+${item.masuk.toLocaleString("id-ID")}</strong>
-      </div>
-      <div class="neraca-row" style="color: var(--eluna-orange);">
-        <span>(-) Distribusi:</span>
-        <strong>-${item.keluar.toLocaleString("id-ID")}</strong>
-      </div>
-      <div class="neraca-row result">
-        <span>Stok Akhir:</span>
-        <span class="val">${item.stokAkhir.toLocaleString("id-ID")}</span>
-      </div>
-    </div>
-  `).join("");
+function updateChartHighlighting() {
+  if (lastChartDataCache.neracaList.length > 0 || Object.keys(lastChartDataCache.kabKotaMap).length > 0) {
+    renderVisualisasiCharts(
+      lastChartDataCache.neracaList,
+      lastChartDataCache.kabKotaMap,
+      lastChartDataCache.totalMasuk,
+      lastChartDataCache.totalKeluar
+    );
+  }
 }
 
 // ==========================================
-// 6. VISUALISASI STATISTIK (PENERIMAAN SUMBER ANGGARAN & DISTRIBUSI 27 KAB/KOTA)
+// 6. VISUALISASI STATISTIK DENGAN CROSS-FILTERING (KLIK BAR CHART)
 // ==========================================
 function renderVisualisasiCharts(neracaList, kabKotaMap, totalMasuk, totalKeluar) {
+  lastChartDataCache = { neracaList, kabKotaMap, totalMasuk, totalKeluar };
+
   const badgeMasuk = document.getElementById("badge-vol-masuk");
   const badgeKeluar = document.getElementById("badge-vol-keluar");
 
@@ -655,7 +769,7 @@ function renderVisualisasiCharts(neracaList, kabKotaMap, totalMasuk, totalKeluar
   if (badgeKeluar) badgeKeluar.textContent = `${totalKeluar.toLocaleString("id-ID")} Unit Keluar`;
 
   // --- Chart 1: Penerimaan Berdasarkan Sumber Anggaran (APBD, APBN, CSR) ---
-  const canvasPenerimaan = document.getElementById("chartPenerimaanSumberAnggaran") || document.getElementById("chartPenerimaanKategori");
+  const canvasPenerimaan = document.getElementById("chartPenerimaanSumberAnggaran");
   if (canvasPenerimaan) {
     const sumberAnggaranMasuk = { APBD: 0, APBN: 0, CSR: 0 };
     activeTransactions.forEach(tx => {
@@ -671,6 +785,13 @@ function renderVisualisasiCharts(neracaList, kabKotaMap, totalMasuk, totalKeluar
       }
     });
 
+    const baseColorsP = { APBD: "#0E63AA", APBN: "#ED7D18", CSR: "#10B981" };
+    const dimmedColorsP = { APBD: "rgba(14, 99, 170, 0.22)", APBN: "rgba(237, 125, 24, 0.22)", CSR: "rgba(16, 185, 129, 0.22)" };
+    const bgColorsP = ["APBD", "APBN", "CSR"].map(s => {
+      if (!activeChartFilter.sumberAnggaran) return baseColorsP[s];
+      return (s === activeChartFilter.sumberAnggaran) ? baseColorsP[s] : dimmedColorsP[s];
+    });
+
     const ctxP = canvasPenerimaan.getContext("2d");
     if (chartPenerimaanInst) chartPenerimaanInst.destroy();
 
@@ -681,7 +802,7 @@ function renderVisualisasiCharts(neracaList, kabKotaMap, totalMasuk, totalKeluar
         datasets: [{
           label: "Volume Penerimaan (Unit)",
           data: [sumberAnggaranMasuk.APBD, sumberAnggaranMasuk.APBN, sumberAnggaranMasuk.CSR],
-          backgroundColor: ["#0E63AA", "#ED7D18", "#10B981"],
+          backgroundColor: bgColorsP,
           borderRadius: 4,
           barPercentage: 0.45
         }]
@@ -689,11 +810,21 @@ function renderVisualisasiCharts(neracaList, kabKotaMap, totalMasuk, totalKeluar
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        onClick: (evt, elements, chart) => {
+          if (elements && elements.length > 0) {
+            const idx = elements[0].index;
+            const lbl = chart.data.labels[idx];
+            handleChartBarClick("sumberAnggaran", lbl);
+          }
+        },
+        onHover: (event, chartElement) => {
+          event.native.target.style.cursor = chartElement[0] ? "pointer" : "default";
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (context) => ` Penerimaan ${context.label}: ${context.parsed.y.toLocaleString("id-ID")} Unit`
+              label: (context) => ` Penerimaan ${context.label}: ${context.parsed.y.toLocaleString("id-ID")} Unit (Klik untuk filter)`
             }
           }
         },
@@ -714,11 +845,18 @@ function renderVisualisasiCharts(neracaList, kabKotaMap, totalMasuk, totalKeluar
   // --- Chart 2: Distribusi ke 27 Kab / Kota Jawa Barat ---
   const canvasDistribusi = document.getElementById("chartDistribusiKabKota");
   if (canvasDistribusi) {
-    // Tampilkan seluruh daerah yang memiliki mutasi distribusi (urut terbesar)
     const sortedDaerah = Object.entries(kabKotaMap)
       .sort((a, b) => b[1] - a[1])
       .filter(d => d[1] > 0 || currentFilterMode === "all")
       .slice(0, 10); // 10 daerah teratas
+
+    const fullNames = sortedDaerah.map(d => d[0]);
+    const bgColorsD = fullNames.map(name => {
+      if (!activeChartFilter.kabKota) return "#ED7D18";
+      return cleanKabKotaName(name) === cleanKabKotaName(activeChartFilter.kabKota)
+        ? "#ED7D18"
+        : "rgba(237, 125, 24, 0.22)";
+    });
 
     const ctxD = canvasDistribusi.getContext("2d");
     if (chartDistribusiInst) chartDistribusiInst.destroy();
@@ -730,7 +868,7 @@ function renderVisualisasiCharts(neracaList, kabKotaMap, totalMasuk, totalKeluar
         datasets: [{
           label: "Volume Distribusi (Unit)",
           data: sortedDaerah.map(d => d[1]),
-          backgroundColor: "#ED7D18",
+          backgroundColor: bgColorsD,
           borderRadius: 4,
           barPercentage: 0.55
         }]
@@ -739,11 +877,21 @@ function renderVisualisasiCharts(neracaList, kabKotaMap, totalMasuk, totalKeluar
         indexAxis: "y",
         responsive: true,
         maintainAspectRatio: false,
+        onClick: (evt, elements, chart) => {
+          if (elements && elements.length > 0) {
+            const idx = elements[0].index;
+            const targetName = fullNames[idx];
+            handleChartBarClick("kabKota", cleanKabKotaName(targetName));
+          }
+        },
+        onHover: (event, chartElement) => {
+          event.native.target.style.cursor = chartElement[0] ? "pointer" : "default";
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (context) => ` Distribusi: ${context.parsed.x.toLocaleString("id-ID")} Unit`
+              label: (context) => ` Distribusi: ${context.parsed.x.toLocaleString("id-ID")} Unit (Klik untuk filter)`
             }
           }
         },
@@ -759,6 +907,138 @@ function renderVisualisasiCharts(neracaList, kabKotaMap, totalMasuk, totalKeluar
         }
       }
     });
+  }
+}
+
+// ==========================================
+// 6.1 TABEL DINAMIS HASIL FILTER INTERAKTIF
+// ==========================================
+function renderDynamicTable() {
+  if (!window.ELUNA_OPERATOR_DATA) return;
+  const tbody = document.getElementById("tbody-dinamis-transaksi");
+  const pillContainer = document.getElementById("active-filter-pills");
+  const resetBtn = document.getElementById("btn-reset-filter");
+  const counterBadge = document.getElementById("counter-tabel-dinamis");
+
+  if (!tbody) return;
+
+  // Filter transaksi aktif
+  let filtered = activeTransactions.filter(tx => {
+    // 1. Filter Sumber Anggaran (APBD, APBN, CSR)
+    if (activeChartFilter.sumberAnggaran) {
+      const dana = (tx.sumberDana || "").toUpperCase();
+      if (!dana.includes(activeChartFilter.sumberAnggaran.toUpperCase())) {
+        return false;
+      }
+    }
+
+    // 2. Filter Wilayah Kab/Kota (Distribusi Keluar)
+    if (activeChartFilter.kabKota) {
+      if (tx.jenis !== "Keluar") return false;
+      const cleanTujuan = cleanKabKotaName(tx.kabKotaTujuan || tx.asalTujuan);
+      if (cleanTujuan !== activeChartFilter.kabKota) {
+        return false;
+      }
+    }
+
+    // 3. Filter Jenis Mutasi (all / masuk / keluar)
+    if (activeChartFilter.jenis === "masuk" && tx.jenis !== "Masuk") return false;
+    if (activeChartFilter.jenis === "keluar" && tx.jenis !== "Keluar") return false;
+
+    return true;
+  });
+
+  // Update Penghitung Baris
+  if (counterBadge) {
+    counterBadge.textContent = `${filtered.length} Transaksi`;
+  }
+
+  // Update Tag Pills & Tombol Reset
+  const hasChartFilter = activeChartFilter.sumberAnggaran || activeChartFilter.kabKota;
+  if (resetBtn) {
+    resetBtn.style.display = hasChartFilter ? "inline-flex" : "none";
+  }
+
+  if (pillContainer) {
+    if (!hasChartFilter) {
+      pillContainer.innerHTML = '<span class="text-filter-default">Menampilkan seluruh data transaksi (Klik bar chart di atas untuk memfilter data secara spesifik)</span>';
+    } else {
+      let pillsHtml = '<span style="font-size: 0.775rem; font-weight: 700; color: #475569;">Filter Aktif:</span>';
+      if (activeChartFilter.sumberAnggaran) {
+        pillsHtml += `
+          <span class="filter-pill-tag">
+            Sumber: ${activeChartFilter.sumberAnggaran}
+            <span class="close-pill" onclick="handleChartBarClick('sumberAnggaran', '${activeChartFilter.sumberAnggaran}')" title="Hapus filter ini">&times;</span>
+          </span>
+        `;
+      }
+      if (activeChartFilter.kabKota) {
+        pillsHtml += `
+          <span class="filter-pill-tag tag-wilayah">
+            Tujuan: ${activeChartFilter.kabKota}
+            <span class="close-pill" onclick="handleChartBarClick('kabKota', '${activeChartFilter.kabKota}')" title="Hapus filter ini">&times;</span>
+          </span>
+        `;
+      }
+      pillContainer.innerHTML = pillsHtml;
+    }
+  }
+
+  // Render Baris Tabel (9 Kolom)
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" style="text-align: center; padding: 2.5rem 1rem; color: #94A3B8;">
+          <i data-lucide="inbox" style="width: 32px; height: 32px; margin-bottom: 0.5rem; opacity: 0.6;"></i>
+          <div style="font-weight: 600; font-size: 0.9rem;">Tidak ada data transaksi yang cocok dengan kombinasi filter saat ini.</div>
+          <div style="font-size: 0.775rem; margin-top: 0.25rem;">Silakan sesuaikan filter waktu atau klik 'Reset Filter Grafik'.</div>
+        </td>
+      </tr>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((tx, idx) => {
+    const isMasuk = tx.jenis === "Masuk";
+    const badgeJenis = isMasuk
+      ? '<span style="font-size: 0.725rem; font-weight: 700; color: #16A34A; background: #DCFCE7; padding: 0.2rem 0.55rem; border-radius: 4px;">Masuk</span>'
+      : '<span style="font-size: 0.725rem; font-weight: 700; color: var(--eluna-orange); background: #FFF4EB; padding: 0.2rem 0.55rem; border-radius: 4px;">Keluar</span>';
+
+    const jmlSign = isMasuk ? `+${tx.jumlah.toLocaleString("id-ID")}` : `-${tx.jumlah.toLocaleString("id-ID")}`;
+    const jmlColor = isMasuk ? "color: #16A34A;" : "color: var(--eluna-orange);";
+
+    const tujuanText = isMasuk ? "-" : (cleanKabKotaName(tx.kabKotaTujuan || tx.asalTujuan) || "-");
+
+    let badgeDana = "#64748B";
+    let bgDana = "#F1F5F9";
+    if ((tx.sumberDana || "").includes("APBD")) { badgeDana = "#0E63AA"; bgDana = "#EBF3FA"; }
+    else if ((tx.sumberDana || "").includes("APBN")) { badgeDana = "#D97706"; bgDana = "#FEF3C7"; }
+    else if ((tx.sumberDana || "").includes("CSR")) { badgeDana = "#16A34A"; bgDana = "#DCFCE7"; }
+
+    return `
+      <tr>
+        <td class="text-center font-medium">${idx + 1}</td>
+        <td style="font-size: 0.8rem; color: #475569;">${formatTgl(tx.tanggal)}</td>
+        <td style="font-weight: 700; color: #0E63AA; font-size: 0.8rem;">${tx.noDokumen}</td>
+        <td class="text-center">${badgeJenis}</td>
+        <td><span style="font-weight: 600; color: #334155;">${tx.kategori}</span></td>
+        <td style="font-weight: 600; color: #1E293B;">${tx.uraianBarang}</td>
+        <td class="text-right" style="font-weight: 700; ${jmlColor}">${jmlSign} <span style="font-size: 0.7rem; font-weight: 500; color: #64748B;">Unit</span></td>
+        <td class="text-center">
+          <span style="font-size: 0.725rem; font-weight: 700; color: ${badgeDana}; background: ${bgDana}; padding: 0.2rem 0.55rem; border-radius: 4px;">
+            ${tx.sumberDana || "APBD"}
+          </span>
+        </td>
+        <td style="font-size: 0.825rem; color: ${isMasuk ? '#94A3B8' : '#1E293B'}; font-weight: ${isMasuk ? '400' : '600'};">
+          ${tujuanText}
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  if (window.lucide) {
+    lucide.createIcons();
   }
 }
 
@@ -828,11 +1108,31 @@ function renderKadaluwarsaModul() {
   if (kpiSubExp) kpiSubExp.textContent = `${countExpired} Kadaluwarsa`;
   if (kpiSubWarn) kpiSubWarn.textContent = `${countWarning} Warning (≤ ${parameterXHari} Hari)`;
 
-  // Filter List sesuai Tab Aktif
+  // Filter List sesuai Tab Aktif (Default: 'kritis' - Gabungan Kadaluwarsa & Warning)
   let filtered = analyzed;
-  if (activeKadaluwarsaTab === "expired") filtered = analyzed.filter(i => i.statusType === "expired");
-  if (activeKadaluwarsaTab === "warning") filtered = analyzed.filter(i => i.statusType === "warning");
-  if (activeKadaluwarsaTab === "aman") filtered = analyzed.filter(i => i.statusType === "safe");
+  if (activeKadaluwarsaTab === "kritis") {
+    filtered = analyzed.filter(i => i.statusType === "expired" || i.statusType === "warning");
+  } else if (activeKadaluwarsaTab === "expired") {
+    filtered = analyzed.filter(i => i.statusType === "expired");
+  } else if (activeKadaluwarsaTab === "warning") {
+    filtered = analyzed.filter(i => i.statusType === "warning");
+  } else if (activeKadaluwarsaTab === "aman") {
+    filtered = analyzed.filter(i => i.statusType === "safe");
+  }
+
+  // Update Status Aktif Tombol Tab
+  const btnKritis = document.getElementById("btn-tab-kritis");
+  const btnExp = document.getElementById("btn-tab-expired");
+  const btnWarn = document.getElementById("btn-tab-warning");
+  const btnAman = document.getElementById("btn-tab-aman");
+
+  if (btnKritis) btnKritis.classList.toggle("active", activeKadaluwarsaTab === "kritis");
+  if (btnExp) btnExp.classList.toggle("active", activeKadaluwarsaTab === "expired");
+  if (btnWarn) {
+    btnWarn.classList.toggle("active", activeKadaluwarsaTab === "warning");
+    btnWarn.innerHTML = `🟡 Warning (&le; ${parameterXHari} Hari)`;
+  }
+  if (btnAman) btnAman.classList.toggle("active", activeKadaluwarsaTab === "aman");
 
   const tbody = document.getElementById("tbody-kadaluwarsa");
   if (!tbody) return;
@@ -856,52 +1156,8 @@ function renderKadaluwarsaModul() {
 }
 
 // ==========================================
-// 8. TABEL RIWAYAT TRANSAKSI OPERATOR
+// 8. HELPER & UTILITIES
 // ==========================================
-function renderMutasiOperatorTable(transactions) {
-  const tbody = document.getElementById("tbody-mutasi-operator");
-  if (!tbody) return;
-
-  if (transactions.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #94A3B8;">Tidak ada data mutasi logistik untuk filter ini.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = transactions.map((tx, idx) => {
-    const isMasuk = tx.jenis === "Masuk";
-    return `
-      <tr>
-        <td class="text-center" style="font-weight: 700; color: #64748B;">${idx + 1}</td>
-        <td style="font-size: 0.775rem; color: #64748B;">${tx.tanggal}</td>
-        <td style="font-family: monospace; font-weight: 700; color: #0E63AA;">${tx.noDokumen}</td>
-        <td>
-          <span style="display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.725rem; font-weight: 700; background-color: ${isMasuk ? '#DCFCE7' : '#FFF4EB'}; color: ${isMasuk ? '#16A34A' : '#D97706'};">
-            ${tx.jenis}
-          </span>
-        </td>
-        <td style="font-weight: 600;">${tx.kategori}</td>
-        <td>${tx.uraianBarang}</td>
-        <td class="text-right" style="font-weight: 800; color: ${isMasuk ? '#16A34A' : '#ED7D18'};">
-          ${isMasuk ? '+' : '-'}${tx.jumlah.toLocaleString("id-ID")} <span style="font-size: 0.7rem; color: #94A3B8;">${tx.satuan}</span>
-        </td>
-        <td style="font-size: 0.8rem; font-weight: 600;">${tx.asalTujuan}</td>
-      </tr>
-    `;
-  }).join("");
-}
-
-// ==========================================
-// 9. HELPER & UTILITIES
-// ==========================================
-
-// Isi Dropdown 27 Kabupaten/Kota pada Form Surat Jalan
-function populateSelect27KabKota() {
-  const sel = document.getElementById("form-sj-tujuan");
-  if (!sel) return;
-  sel.innerHTML = DAFTAR_27_KAB_KOTA_JABAR.map(kab => `
-    <option value="${kab}">${kab}</option>
-  `).join("");
-}
 
 // Normalisasi Nama Kategori ke 4 Standar Resmi
 function normalizeCategory(kat) {
@@ -929,30 +1185,26 @@ function formatTgl(dateStr) {
   return `${p[2]} ${bln[parseInt(p[1], 10) - 1]} ${p[0]}`;
 }
 
-// Tampilkan Toast Notifikasi
+// Tampilkan Toast Notifikasi (Maksimal 3 Pop-up, FIFO Auto-Replace)
 function showToast(msg) {
   const c = document.getElementById("toast-container");
   if (!c) return;
+
+  // Batasi maksimal 3 pop-up: Hapus toast tertua jika sudah >= 3
+  while (c.children.length >= 3) {
+    c.firstElementChild.remove();
+  }
+
   const t = document.createElement("div");
   t.className = "toast-item";
   t.textContent = msg;
   c.appendChild(t);
+
   setTimeout(() => {
     t.style.opacity = "0";
-    t.style.transition = "opacity 0.3s ease";
-    setTimeout(() => t.remove(), 300);
-  }, 3500);
-}
-
-// Modal Controllers
-function openModal(id) {
-  const m = document.getElementById(id);
-  if (m) m.showModal();
-}
-
-function closeModal(id) {
-  const m = document.getElementById(id);
-  if (m) m.close();
+    t.style.transition = "opacity 0.25s ease";
+    setTimeout(() => t.remove(), 250);
+  }, 2500);
 }
 
 function scrollToSection(id) {
@@ -960,83 +1212,1225 @@ function scrollToSection(id) {
   if (el) el.scrollIntoView({ behavior: "smooth" });
 }
 
-// Submit Form Transaksi Manual BAST & SJ
-function submitBAST(e) {
-  e.preventDefault();
-  const no = document.getElementById("form-bast-no").value;
-  const kat = document.getElementById("form-bast-kat").value;
-  const item = document.getElementById("form-bast-item").value;
-  const qty = parseInt(document.getElementById("form-bast-qty").value, 10);
-  const asal = document.getElementById("form-bast-asal").value;
-
-  const now = new Date();
-  const tglStr = now.toISOString().slice(0, 10);
-
-  const newTx = {
-    id: `TX-${Date.now().toString().slice(-4)}`,
-    tanggal: tglStr,
-    bulan: now.toISOString().slice(0, 7),
-    tahun: now.getFullYear().toString(),
-    noDokumen: no,
-    jenis: "Masuk",
-    kategori: kat,
-    uraianBarang: item,
-    jumlah: qty,
-    satuan: "Unit/Paket",
-    sumberDana: asal,
-    asalTujuan: `Sumber: ${asal}`,
-    kabKotaTujuan: "-"
-  };
-
-  ELUNA_OPERATOR_DATA.riwayatMutasiSemua.unshift(newTx);
-  closeModal("modal-bast");
-
-  if (currentFilterMode === "default10") {
-    activeTransactions = ELUNA_OPERATOR_DATA.riwayatMutasiSemua.slice(0, 10);
-  } else {
-    activeTransactions.unshift(newTx);
-  }
-
-  updateDashboardCore();
-  showToast(`Penerimaan ${no} (+${qty.toLocaleString("id-ID")} ${kat}) berhasil disimpan!`);
+// ==========================================
+// PLACEHOLDER HANDLER VIEW KABID & VIEW KALAK
+// ==========================================
+function renderKabidView(neracaData, totalAkumulasiStokAkhir, countSj, totalKeluarUnit) {
+  // Tampilan Kabid saat ini dikosongkan (empty-state placeholder)
 }
 
-function submitSJ(e) {
-  e.preventDefault();
-  const no = document.getElementById("form-sj-no").value;
-  const tujuan = document.getElementById("form-sj-tujuan").value;
-  const kat = document.getElementById("form-sj-kat").value;
-  const item = document.getElementById("form-sj-item").value;
-  const qty = parseInt(document.getElementById("form-sj-qty").value, 10);
+function renderKalakView(neracaData, totalAkumulasiStokAkhir) {
+  // Tampilan Kalak saat ini dikosongkan (empty-state placeholder)
+}
 
-  const now = new Date();
-  const tglStr = now.toISOString().slice(0, 10);
+// ==========================================
+// 9. MODUL POP-UP RINCIAN STOK EKSISTING LOGISTIK
+// ==========================================
 
-  const newTx = {
-    id: `TX-${Date.now().toString().slice(-4)}`,
-    tanggal: tglStr,
-    bulan: now.toISOString().slice(0, 7),
-    tahun: now.getFullYear().toString(),
-    noDokumen: no,
-    jenis: "Keluar",
-    kategori: kat,
-    uraianBarang: item,
-    jumlah: qty,
-    satuan: "Unit/Paket",
-    sumberDana: "APBD",
-    asalTujuan: `Tujuan: ${tujuan}`,
-    kabKotaTujuan: tujuan
-  };
+// Buka Modal Stok Eksisting
+function openModalStokEksisting() {
+  const modal = document.getElementById("modal-stok-eksisting");
+  if (!modal) return;
+  modal.classList.add("active");
 
-  ELUNA_OPERATOR_DATA.riwayatMutasiSemua.unshift(newTx);
-  closeModal("modal-sj");
-
-  if (currentFilterMode === "default10") {
-    activeTransactions = ELUNA_OPERATOR_DATA.riwayatMutasiSemua.slice(0, 10);
-  } else {
-    activeTransactions.unshift(newTx);
+  // Perbarui Label Periode Aktif pada Header Modal
+  const elPeriodLabel = document.getElementById("modal-active-period-label");
+  if (elPeriodLabel) {
+    if (currentFilterMode === "default10") {
+      elPeriodLabel.textContent = "Periode: 10 Inputan Pengisian Terakhir";
+    } else if (currentFilterMode === "all") {
+      const cnt = (window.ELUNA_OPERATOR_DATA && window.ELUNA_OPERATOR_DATA.riwayatMutasiSemua) ? window.ELUNA_OPERATOR_DATA.riwayatMutasiSemua.length : 250;
+      elPeriodLabel.textContent = `Periode: Seluruh Database (${cnt} Transaksi Kumulatif)`;
+    } else {
+      const ind = document.getElementById("indicator-filter-mode");
+      elPeriodLabel.textContent = ind ? ind.textContent.replace("Mode Tampilan: ", "") : "Periode Terfilter";
+    }
   }
 
-  updateDashboardCore();
-  showToast(`Surat Jalan ${no} (-${qty.toLocaleString("id-ID")} ke ${tujuan}) berhasil diterbitkan!`);
+  buildAggregatedStockData();
+  renderModalStokContent();
+  if (window.lucide) lucide.createIcons();
 }
+
+// Tutup Modal Stok Eksisting
+function closeModalStokEksisting() {
+  const modal = document.getElementById("modal-stok-eksisting");
+  if (!modal) return;
+  modal.classList.remove("active");
+}
+
+function handleModalBackdropClick(e) {
+  if (e.target && e.target.id === "modal-stok-eksisting") {
+    closeModalStokEksisting();
+  }
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeModalStokEksisting();
+  }
+});
+
+// Membangun Agregasi Data Stok per Komoditas & Sumber Dana (Sinkron dengan Periode Terpilih)
+function buildAggregatedStockData() {
+  if (!window.ELUNA_OPERATOR_DATA) return;
+
+  const daftarStokAwal = window.ELUNA_OPERATOR_DATA.daftarStokAwalPerBarang || [];
+  // Sinkronkan arus mutasi masuk dan keluar dengan periode running yang sedang aktif di bilah filter
+  const activeTx = (activeTransactions && activeTransactions.length > 0)
+    ? activeTransactions
+    : ((window.ELUNA_OPERATOR_DATA && window.ELUNA_OPERATOR_DATA.riwayatMutasiSemua) ? window.ELUNA_OPERATOR_DATA.riwayatMutasiSemua : []);
+  const daftarKadaluwarsa = window.ELUNA_OPERATOR_DATA.daftarBarangKadaluwarsa || [];
+  const refDate = new Date(window.ELUNA_OPERATOR_DATA.metadata.tanggalAcuanSistem);
+
+  const itemMap = new Map();
+
+  // 1. Data Stok Awal per (Barang, Sumber)
+  daftarStokAwal.forEach(row => {
+    const bName = (row.barang || "").trim();
+    if (!bName) return;
+    if (!itemMap.has(bName)) {
+      itemMap.set(bName, {
+        namaBarang: bName,
+        kategori: (row.kategori || "Logistik Lainnya").trim(),
+        sources: {
+          APBD: { awal: 0, masuk: 0, keluar: 0, expired: 0 },
+          APBN: { awal: 0, masuk: 0, keluar: 0, expired: 0 },
+          CSR:  { awal: 0, masuk: 0, keluar: 0, expired: 0 }
+        }
+      });
+    }
+    const item = itemMap.get(bName);
+    const s = (row.sumber || "APBD").toUpperCase().trim();
+    const sKey = s.includes("APBN") ? "APBN" : s.includes("CSR") ? "CSR" : "APBD";
+    item.sources[sKey].awal += (row.stokAwal || 0);
+  });
+
+  // 2. Akumulasi Riwayat Transaksi Mutasi Berdasarkan Periode Terpilih
+  activeTx.forEach(tx => {
+    const bName = (tx.uraianBarang || "").trim();
+    if (!bName) return;
+    if (!itemMap.has(bName)) {
+      itemMap.set(bName, {
+        namaBarang: bName,
+        kategori: tx.kategori || "Pangan",
+        sources: {
+          APBD: { awal: 0, masuk: 0, keluar: 0, expired: 0 },
+          APBN: { awal: 0, masuk: 0, keluar: 0, expired: 0 },
+          CSR:  { awal: 0, masuk: 0, keluar: 0, expired: 0 }
+        }
+      });
+    }
+    const item = itemMap.get(bName);
+    const s = (tx.sumberDana || "APBD").toUpperCase().trim();
+    const sKey = s.includes("APBN") ? "APBN" : s.includes("CSR") ? "CSR" : "APBD";
+    if (tx.jenis === "Masuk") {
+      item.sources[sKey].masuk += tx.jumlah;
+    } else if (tx.jenis === "Keluar") {
+      item.sources[sKey].keluar += tx.jumlah;
+    }
+  });
+
+  // 3. Eksklusi Barang Kadaluwarsa (Lewat Tanggal Kadaluwarsa Asli)
+  daftarKadaluwarsa.forEach(exp => {
+    const expDate = new Date(exp.tglKadaluwarsaAsli);
+    const diff = Math.ceil((expDate - refDate) / (1000 * 60 * 60 * 24));
+    if (diff <= 0) {
+      const bName = (exp.namaBarang || "").trim();
+      if (itemMap.has(bName)) {
+        const item = itemMap.get(bName);
+        const s = (exp.sumber || "APBD").toUpperCase().trim();
+        const sKey = s.includes("APBN") ? "APBN" : s.includes("CSR") ? "CSR" : "APBD";
+        item.sources[sKey].expired += (exp.jumlahStok || 0);
+      }
+    }
+  });
+
+  let grandLayak = 0;
+  let grandExpired = 0;
+  modalAggregatedStockData = [];
+
+  itemMap.forEach(item => {
+    let totAwal = 0;
+    let totMasuk = 0;
+    let totKeluar = 0;
+    let totExp = 0;
+    let totFisik = 0;
+    let totLayak = 0;
+
+    const sourceBreakdowns = ["APBD", "APBN", "CSR"].map(sKey => {
+      const sData = item.sources[sKey];
+      const fisik = sData.awal + sData.masuk - sData.keluar;
+      // Validasi Stok Kadaluwarsa Realistis: Hanya yang nyata-nyata masih sisa di gudang (tidak melebihi stok fisik)
+      const actualExpired = Math.max(0, Math.min(sData.expired, fisik));
+      const layak = Math.max(0, fisik - actualExpired);
+
+      totAwal += sData.awal;
+      totMasuk += sData.masuk;
+      totKeluar += sData.keluar;
+      totExp += actualExpired;
+      totFisik += fisik;
+      totLayak += layak;
+
+      return {
+        sumber: sKey,
+        stokAwal: sData.awal,
+        masuk: sData.masuk,
+        keluar: sData.keluar,
+        stokFisik: fisik,
+        expired: actualExpired,
+        stokLayak: layak
+      };
+    });
+
+    grandLayak += totLayak;
+    grandExpired += totExp;
+
+    const safeId = "brg-" + item.namaBarang.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
+
+    modalAggregatedStockData.push({
+      safeId: safeId,
+      namaBarang: item.namaBarang,
+      kategori: item.kategori,
+      stokAwal: totAwal,
+      masuk: totMasuk,
+      keluar: totKeluar,
+      stokFisik: totFisik,
+      expired: totExp,
+      stokLayak: totLayak,
+      sources: sourceBreakdowns
+    });
+  });
+
+  // Urutkan berdasarkan Kategori, lalu Nama Barang
+  modalAggregatedStockData.sort((a, b) => a.kategori.localeCompare(b.kategori) || a.namaBarang.localeCompare(b.namaBarang));
+
+  // Perbarui Badge Total di Header Modal
+  const elBadgeLayak = document.getElementById("modal-badge-stok-layak");
+  const elBadgeExp = document.getElementById("modal-badge-kadaluwarsa-exclude");
+
+  if (elBadgeLayak) elBadgeLayak.textContent = `${grandLayak.toLocaleString("id-ID")} Unit Layak Pakai`;
+  if (elBadgeExp) elBadgeExp.textContent = `${grandExpired.toLocaleString("id-ID")} Unit Kadaluwarsa (Exclude)`;
+}
+
+// Render Isi Tabel Modal Stok
+function renderModalStokContent() {
+  const tbody = document.getElementById("tbody-modal-stok-master");
+  if (!tbody) return;
+
+  const kw = modalSearchKeyword.toLowerCase().trim();
+  const filtered = modalAggregatedStockData.filter(item => {
+    const matchKat = (modalKategoriFilter === "all") || (item.kategori.toLowerCase() === modalKategoriFilter.toLowerCase());
+    const matchKw = !kw || item.namaBarang.toLowerCase().includes(kw);
+    return matchKat && matchKw;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" style="text-align: center; padding: 2.5rem 1rem; color: #94A3B8;">
+          <i data-lucide="package-search" style="width: 32px; height: 32px; margin-bottom: 0.5rem; opacity: 0.6;"></i>
+          <div style="font-weight: 600;">Tidak ada komoditas logistik yang cocok dengan kriteria pencarian.</div>
+        </td>
+      </tr>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((item, idx) => {
+    const isExpanded = expandedBarangSet.has(item.safeId);
+    const expBadge = item.expired > 0
+      ? `<span class="badge-exp-exclude" title="Exclude dari stok layak pakai">-${item.expired.toLocaleString("id-ID")}</span>`
+      : `<span style="color: #94A3B8;">-</span>`;
+
+    const subRowsHtml = item.sources.map(s => {
+      let colorBg = "#F1F5F9";
+      let colorTxt = "#475569";
+      if (s.sumber === "APBD") { colorBg = "#EBF3FA"; colorTxt = "#0E63AA"; }
+      else if (s.sumber === "APBN") { colorBg = "#FEF3C7"; colorTxt = "#D97706"; }
+      else if (s.sumber === "CSR") { colorBg = "#DCFCE7"; colorTxt = "#16A34A"; }
+
+      const sExp = s.expired > 0 ? `<span class="badge-exp-exclude">-${s.expired.toLocaleString("id-ID")}</span>` : `<span style="color: #94A3B8;">-</span>`;
+
+      return `
+        <tr>
+          <td>
+            <span style="font-weight: 700; color: ${colorTxt}; background: ${colorBg}; padding: 0.2rem 0.55rem; border-radius: 4px;">
+              ${s.sumber}
+            </span>
+          </td>
+          <td class="text-right">${s.stokAwal.toLocaleString("id-ID")}</td>
+          <td class="text-right" style="color: #16A34A; font-weight: 600;">+${s.masuk.toLocaleString("id-ID")}</td>
+          <td class="text-right" style="color: var(--eluna-orange); font-weight: 600;">-${s.keluar.toLocaleString("id-ID")}</td>
+          <td class="text-right">${sExp}</td>
+          <td class="text-right" style="font-weight: 700; color: ${s.stokLayak < 0 ? '#DC2626' : '#0E63AA'};">
+            ${s.stokLayak.toLocaleString("id-ID")} <span style="font-size: 0.7rem; font-weight: 500; color: #64748B;">Unit</span>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    return `
+      <!-- Baris Master Komoditas -->
+      <tr class="row-item-master ${isExpanded ? 'expanded' : ''}" onclick="toggleDrilldownSumberDana('${item.safeId}')" title="Klik untuk membuka/menutup rincian sumber dana">
+        <td class="text-center font-medium">${idx + 1}</td>
+        <td>
+          <div style="font-weight: 700; color: #1E293B;">
+            ${item.namaBarang}
+          </div>
+        </td>
+        <td>
+          <span style="font-size: 0.75rem; font-weight: 600; color: #475569; background: #F1F5F9; padding: 0.2rem 0.5rem; border-radius: 4px;">
+            ${item.kategori}
+          </span>
+        </td>
+        <td class="text-right" style="color: #475569;">${item.stokAwal.toLocaleString("id-ID")}</td>
+        <td class="text-right" style="color: #16A34A; font-weight: 600;">+${item.masuk.toLocaleString("id-ID")}</td>
+        <td class="text-right" style="color: var(--eluna-orange); font-weight: 600;">-${item.keluar.toLocaleString("id-ID")}</td>
+        <td class="text-right">${expBadge}</td>
+        <td class="text-right" style="font-weight: 800; color: #0E63AA; font-size: 0.875rem;">
+          ${item.stokLayak.toLocaleString("id-ID")} <span style="font-size: 0.7rem; font-weight: 500; color: #64748B;">Unit</span>
+        </td>
+        <td class="text-center">
+          <button class="btn-arsip" style="height: 28px; padding: 0 0.55rem; font-size: 0.725rem; gap: 0.25rem;">
+            <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" style="width: 14px; height: 14px;"></i>
+            <span>${isExpanded ? 'Tutup' : 'Rincian'}</span>
+          </button>
+        </td>
+      </tr>
+
+      <!-- Baris Detail Drilldown Sumber Dana (Accordion) -->
+      <tr class="drilldown-container-row ${isExpanded ? 'active' : ''}" id="drilldown-${item.safeId}">
+        <td colspan="9" style="padding: 0; border-top: none;">
+          <div class="drilldown-content-box">
+            <div style="font-size: 0.75rem; font-weight: 700; color: #334155; margin-bottom: 0.45rem; display: flex; align-items: center; gap: 0.35rem;">
+              <i data-lucide="layers" style="width: 13px; height: 13px; color: #0E63AA;"></i>
+              <span>Rincian Alokasi Sumber Pendanaan untuk Komoditas: <strong>${item.namaBarang}</strong></span>
+            </div>
+            <table class="drilldown-subtable">
+              <thead>
+                <tr>
+                  <th style="width: 130px;">Sumber Pendanaan</th>
+                  <th style="width: 110px;" class="text-right">Stok Awal</th>
+                  <th style="width: 110px;" class="text-right">Masuk (+)</th>
+                  <th style="width: 110px;" class="text-right">Keluar (-)</th>
+                  <th style="width: 120px;" class="text-right">Kadaluwarsa</th>
+                  <th style="width: 150px;" class="text-right">Sisa Stok Layak</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${subRowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+// Toggle Baris Akordeon Drilldown
+function toggleDrilldownSumberDana(safeId) {
+  if (expandedBarangSet.has(safeId)) {
+    expandedBarangSet.delete(safeId);
+  } else {
+    expandedBarangSet.add(safeId);
+  }
+  renderModalStokContent();
+}
+
+// Filter Kategori di Modal
+function filterModalKategori(kat, btnEl) {
+  modalKategoriFilter = kat;
+  const parent = document.getElementById("modal-category-filter-buttons");
+  if (parent) {
+    Array.from(parent.children).forEach(b => b.classList.remove("active"));
+    if (btnEl) btnEl.classList.add("active");
+  }
+  renderModalStokContent();
+}
+
+// Pencarian Barang di Modal
+function handleModalSearch(val) {
+  modalSearchKeyword = val;
+  renderModalStokContent();
+}
+
+// ========================================================
+// 8. VIEW KABID (MANAJERIAL KUANTITAS PENGUATAN LOGISTIK)
+// ========================================================
+
+let kabidSelectedTahun = "ALL";
+let kabidSelectedKategori = "ALL";
+let kabidSelectedStatus = "ALL"; // "ALL" | "kritis" | "kurang" | "aman"
+let kabidSelectedWilayah = null;
+let kabidSearchQuery = "";
+let chartKabidPemenuhanInstance = null;
+let chartKabidGapKategoriInstance = null;
+
+function handleKabidFilterChange() {
+  const selThn = document.getElementById("kabid-filter-tahun");
+  const selKat = document.getElementById("kabid-filter-kategori");
+  if (selThn) kabidSelectedTahun = selThn.value;
+  if (selKat) kabidSelectedKategori = selKat.value;
+  kabidSelectedWilayah = null;
+  renderKabidView();
+}
+
+function filterKabidTableStatus(statusKey) {
+  kabidSelectedStatus = statusKey;
+  const pillIds = {
+    "ALL": "btn-status-all",
+    "kritis": "btn-status-kritis",
+    "kurang": "btn-status-kurang",
+    "aman": "btn-status-aman"
+  };
+  Object.values(pillIds).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("active");
+  });
+  const activeEl = document.getElementById(pillIds[statusKey]);
+  if (activeEl) activeEl.classList.add("active");
+
+  renderKabidTable();
+}
+
+function handleKabidSearch(val) {
+  kabidSearchQuery = (val || "").toLowerCase().trim();
+  renderKabidTable();
+}
+
+function resetKabidTableFilter() {
+  kabidSelectedStatus = "ALL";
+  kabidSelectedWilayah = null;
+  kabidSearchQuery = "";
+  const sInput = document.getElementById("kabid-search-input");
+  if (sInput) sInput.value = "";
+  filterKabidTableStatus("ALL");
+  renderKabidView();
+  showToast("Filter tabel kesenjangan daerah direset");
+}
+
+// Komputasi Dataset Kabid (Kuantitas Permohonan vs Realisasi Distribusi)
+function computeKabidDataset() {
+  const allReq = (window.ELUNA_OPERATOR_DATA && window.ELUNA_OPERATOR_DATA.daftarPermohonanDaerah) || [];
+  const allTx = (window.ELUNA_OPERATOR_DATA && window.ELUNA_OPERATOR_DATA.riwayatMutasiSemua) || [];
+  const allDist = allTx.filter(t => t.jenis === "Keluar");
+  const masterDaerah = (window.ELUNA_OPERATOR_DATA && window.ELUNA_OPERATOR_DATA.kabKotaJabar) || [];
+
+  // Filter permohonan
+  const filteredReq = allReq.filter(r => {
+    const matchThn = (kabidSelectedTahun === "ALL") || (r.tahunAnggaran === parseInt(kabidSelectedTahun, 10));
+    const matchKat = (kabidSelectedKategori === "ALL") || (r.kategori === kabidSelectedKategori);
+    return matchThn && matchKat;
+  });
+
+  // Filter distribusi keluar
+  const filteredDist = allDist.filter(d => {
+    const matchThn = (kabidSelectedTahun === "ALL") || (d.tahun === kabidSelectedTahun);
+    const matchKat = (kabidSelectedKategori === "ALL") || (d.kategori === kabidSelectedKategori);
+    return matchThn && matchKat;
+  });
+
+  // Agregasi per Daerah (27 Kab/Kota Jawa Barat)
+  const daerahMap = {};
+  masterDaerah.forEach(d => {
+    daerahMap[d] = {
+      daerah: d,
+      minta: 0,
+      realisasi: 0,
+      gap: 0,
+      capaian: 0,
+      status: "kritis",
+      items: []
+    };
+  });
+
+  // Rekapitulasi permohonan ke dalam peta daerah
+  filteredReq.forEach(r => {
+    if (!daerahMap[r.kabKota]) {
+      daerahMap[r.kabKota] = {
+        daerah: r.kabKota,
+        minta: 0,
+        realisasi: 0,
+        gap: 0,
+        capaian: 0,
+        status: "kritis",
+        items: []
+      };
+    }
+    daerahMap[r.kabKota].minta += r.jumlahDiminta;
+    daerahMap[r.kabKota].items.push({
+      barang: r.barang,
+      kategori: r.kategori,
+      diminta: r.jumlahDiminta,
+      realisasi: 0,
+      gap: r.jumlahDiminta,
+      capaian: 0,
+      status: "kritis",
+      noSurat: r.noSurat
+    });
+  });
+
+  // Rekapitulasi realisasi distribusi ke dalam peta daerah
+  filteredDist.forEach(d => {
+    const dTarget = d.kabKotaTujuan;
+    if (daerahMap[dTarget]) {
+      daerahMap[dTarget].realisasi += d.jumlah;
+      const matchedItem = daerahMap[dTarget].items.find(it => it.barang === d.uraianBarang);
+      if (matchedItem) {
+        matchedItem.realisasi += d.jumlah;
+      } else {
+        daerahMap[dTarget].items.push({
+          barang: d.uraianBarang,
+          kategori: d.kategori,
+          diminta: 0,
+          realisasi: d.jumlah,
+          gap: 0,
+          capaian: 100,
+          status: "aman",
+          noSurat: "-"
+        });
+      }
+    }
+  });
+
+  // Kalkulasi gap, capaian persentase, dan klasifikasi status
+  Object.values(daerahMap).forEach(d => {
+    d.gap = Math.max(0, d.minta - d.realisasi);
+    d.capaian = d.minta > 0 ? (d.realisasi / d.minta) * 100 : (d.realisasi > 0 ? 100 : 0);
+    if (d.capaian >= 80) d.status = "aman";
+    else if (d.capaian >= 50) d.status = "kurang";
+    else d.status = "kritis";
+
+    d.items.forEach(it => {
+      it.gap = Math.max(0, it.diminta - it.realisasi);
+      it.capaian = it.diminta > 0 ? (it.realisasi / it.diminta) * 100 : (it.realisasi > 0 ? 100 : 0);
+      if (it.capaian >= 80) it.status = "aman";
+      else if (it.capaian >= 50) it.status = "kurang";
+      else it.status = "kritis";
+    });
+  });
+
+  return {
+    filteredReq,
+    filteredDist,
+    daerahMap: Object.values(daerahMap)
+  };
+}
+
+// Render Utama Tampilan View Kabid
+function renderKabidView() {
+  const { filteredReq, filteredDist, daerahMap } = computeKabidDataset();
+
+  // 1. Hitung ringkasan akumulatif
+  const totalMinta = daerahMap.reduce((acc, d) => acc + d.minta, 0);
+  const totalAlokasi = daerahMap.reduce((acc, d) => acc + d.realisasi, 0);
+  const totalGap = Math.max(0, totalMinta - totalAlokasi);
+  const rasioPemenuhan = totalMinta > 0 ? ((totalAlokasi / totalMinta) * 100).toFixed(1) : "0.0";
+  const gapPercent = totalMinta > 0 ? ((totalGap / totalMinta) * 100).toFixed(1) : "0.0";
+
+  const countKritis = daerahMap.filter(d => d.status === "kritis").length;
+  const countKurang = daerahMap.filter(d => d.status === "kurang").length;
+  const countAman = daerahMap.filter(d => d.status === "aman").length;
+
+  const uniqueSurat = new Set(filteredReq.map(r => r.noSurat)).size;
+
+  // 2. Pasang nilai ke 4 Kartu Metrik Kuantitas
+  const elMinta = document.getElementById("kpi-kabid-total-minta");
+  if (elMinta) elMinta.textContent = totalMinta.toLocaleString("id-ID");
+
+  const elSurat = document.getElementById("kpi-kabid-surat-count");
+  if (elSurat) elSurat.textContent = `${uniqueSurat} Surat Permohonan`;
+
+  const elAlokasi = document.getElementById("kpi-kabid-total-alokasi");
+  if (elAlokasi) elAlokasi.textContent = totalAlokasi.toLocaleString("id-ID");
+
+  const elRasio = document.getElementById("kpi-kabid-rasio-pemenuhan");
+  if (elRasio) elRasio.textContent = `Capaian: ${rasioPemenuhan}%`;
+
+  const elGap = document.getElementById("kpi-kabid-total-gap");
+  if (elGap) elGap.textContent = totalGap.toLocaleString("id-ID");
+
+  const elGapPct = document.getElementById("kpi-kabid-gap-percent");
+  if (elGapPct) elGapPct.textContent = `Sisa Kebutuhan: ${gapPercent}%`;
+
+  const elKritis = document.getElementById("kpi-kabid-wilayah-kritis");
+  if (elKritis) elKritis.textContent = `${countKritis} Daerah`;
+
+  const elWilSub = document.getElementById("kpi-kabid-wilayah-sub");
+  if (elWilSub) elWilSub.textContent = `Prioritas Alokasi (${countKurang} Kurang, ${countAman} Aman)`;
+
+  // Perbarui label tombol status
+  const bAll = document.getElementById("btn-status-all");
+  if (bAll) bAll.textContent = `Semua (${daerahMap.length})`;
+  const bKritis = document.getElementById("btn-status-kritis");
+  if (bKritis) bKritis.textContent = `🔴 Kritis (${countKritis})`;
+  const bKurang = document.getElementById("btn-status-kurang");
+  if (bKurang) bKurang.textContent = `🟡 Kurang (${countKurang})`;
+  const bAman = document.getElementById("btn-status-aman");
+  if (bAman) bAman.textContent = `🟢 Aman (${countAman})`;
+
+  // 3. Render 2 Grafik Chart.js
+  renderKabidCharts(daerahMap, filteredReq, filteredDist);
+
+  // 4. Render Tabel Drill-down
+  renderKabidTable();
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+// Inisialisasi & Render Grafik Kabid
+function renderKabidCharts(daerahList, filteredReq, filteredDist) {
+  // --- GRAFIK 1: STATUS PEMENUHAN PER WILAYAH (HORIZONTAL BAR) ---
+  const canvas1 = document.getElementById("chartKabidPemenuhanWilayah");
+  if (canvas1) {
+    if (chartKabidPemenuhanInstance) {
+      chartKabidPemenuhanInstance.destroy();
+    }
+
+    // Urutkan daerah dari persentase capaian tertinggi ke terendah
+    const sortedDaerah = [...daerahList].sort((a, b) => b.capaian - a.capaian);
+    const labels = sortedDaerah.map(d => d.daerah.replace("Kabupaten ", "Kab. "));
+    const dataValues = sortedDaerah.map(d => parseFloat(d.capaian.toFixed(1)));
+    const bgColors = sortedDaerah.map(d => {
+      if (d.status === "aman") return "#16A34A";
+      if (d.status === "kurang") return "#D97706";
+      return "#DC2626";
+    });
+
+    const ctx1 = canvas1.getContext("2d");
+    chartKabidPemenuhanInstance = new Chart(ctx1, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Pemenuhan Realisasi (%)",
+          data: dataValues,
+          backgroundColor: bgColors,
+          borderRadius: 4,
+          barThickness: 9
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const idx = context.dataIndex;
+                const d = sortedDaerah[idx];
+                return [
+                  `Capaian: ${context.parsed.x}% (${d.status.toUpperCase()})`,
+                  `Permohonan : ${d.minta.toLocaleString('id-ID')} Unit`,
+                  `Realisasi  : ${d.realisasi.toLocaleString('id-ID')} Unit`,
+                  `Gap        : ${d.gap.toLocaleString('id-ID')} Unit`
+                ];
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              callback: val => val + "%",
+              font: { size: 10 }
+            },
+            grid: { color: "#F1F5F9" }
+          },
+          y: {
+            ticks: {
+              font: { size: 9, weight: "600" },
+              autoSkip: false
+            },
+            grid: { display: false }
+          }
+        },
+        onClick: (evt, elements) => {
+          if (elements && elements.length > 0) {
+            const idx = elements[0].index;
+            const clickedDaerah = sortedDaerah[idx].daerah;
+            kabidSelectedWilayah = (kabidSelectedWilayah === clickedDaerah) ? null : clickedDaerah;
+            renderKabidTable();
+            showToast(kabidSelectedWilayah ? `Menyaring tabel: ${clickedDaerah}` : "Menampilkan seluruh wilayah");
+            const tbl = document.getElementById("table-kabid-drilldown");
+            if (tbl) tbl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        }
+      }
+    });
+  }
+
+  // --- GRAFIK 2: GAP PER KATEGORI BARANG (GROUPED BAR) ---
+  const canvas2 = document.getElementById("chartKabidGapKategori");
+  if (canvas2) {
+    if (chartKabidGapKategoriInstance) {
+      chartKabidGapKategoriInstance.destroy();
+    }
+
+    const categories = ["Sandang", "Pangan", "Papan", "Logistik Lainnya"];
+    const reqPerKat = categories.map(k => {
+      return filteredReq.filter(r => r.kategori === k).reduce((acc, r) => acc + r.jumlahDiminta, 0);
+    });
+    const distPerKat = categories.map(k => {
+      return filteredDist.filter(d => d.kategori === k).reduce((acc, d) => acc + d.jumlah, 0);
+    });
+    const gapPerKat = categories.map((k, i) => Math.max(0, reqPerKat[i] - distPerKat[i]));
+
+    const ctx2 = canvas2.getContext("2d");
+    chartKabidGapKategoriInstance = new Chart(ctx2, {
+      type: "bar",
+      data: {
+        labels: categories,
+        datasets: [
+          {
+            label: "Permohonan (Unit)",
+            data: reqPerKat,
+            backgroundColor: "#3B82F6",
+            borderRadius: 4
+          },
+          {
+            label: "Realisasi Penyaluran (Unit)",
+            data: distPerKat,
+            backgroundColor: "#10B981",
+            borderRadius: 4
+          },
+          {
+            label: "Kesenjangan / Gap (Unit)",
+            data: gapPerKat,
+            backgroundColor: "#F97316",
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "top",
+            labels: {
+              boxWidth: 12,
+              font: { size: 11, weight: "600" }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: context => `${context.dataset.label}: ${context.parsed.y.toLocaleString('id-ID')} Unit`
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: val => val.toLocaleString('id-ID'),
+              font: { size: 10 }
+            },
+            grid: { color: "#F1F5F9" }
+          }
+        }
+      }
+    });
+  }
+}
+
+// Render Tabel Drill-Down Kabid
+function renderKabidTable() {
+  const { daerahMap } = computeKabidDataset();
+  const tbody = document.getElementById("tbody-kabid-drilldown");
+  const counterEl = document.getElementById("kabid-table-counter");
+  if (!tbody) return;
+
+  let flatRows = [];
+  daerahMap.forEach(d => {
+    if (kabidSelectedWilayah && d.daerah !== kabidSelectedWilayah) return;
+    if (kabidSelectedStatus !== "ALL" && d.status !== kabidSelectedStatus) return;
+
+    d.items.forEach(it => {
+      if (kabidSearchQuery) {
+        const matchSearch = d.daerah.toLowerCase().includes(kabidSearchQuery) ||
+                            it.barang.toLowerCase().includes(kabidSearchQuery) ||
+                            it.kategori.toLowerCase().includes(kabidSearchQuery);
+        if (!matchSearch) return;
+      }
+
+      flatRows.push({
+        daerah: d.daerah,
+        daerahStatus: d.status,
+        barang: it.barang,
+        kategori: it.kategori,
+        diminta: it.diminta,
+        realisasi: it.realisasi,
+        gap: it.gap,
+        capaian: it.capaian,
+        status: it.status,
+        noSurat: it.noSurat
+      });
+    });
+  });
+
+  if (flatRows.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" style="text-align: center; padding: 2.5rem; color: #64748B;">
+          <p style="font-weight: 600;">Tidak ada data evaluasi penguatan yang sesuai dengan kriteria filter saat ini.</p>
+          <button class="status-pill-btn" onclick="resetKabidTableFilter()" style="margin-top: 0.75rem;">Reset Filter</button>
+        </td>
+      </tr>
+    `;
+    if (counterEl) counterEl.textContent = "Menampilkan 0 entri";
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  const katColors = {
+    "Pangan": { bg: "#EFF6FF", text: "#1D4ED8", border: "#BFDBFE" },
+    "Sandang": { bg: "#F5F3FF", text: "#6D28D9", border: "#DDD6FE" },
+    "Papan": { bg: "#FFF7ED", text: "#C2410C", border: "#FED7AA" },
+    "Logistik Lainnya": { bg: "#ECFDF5", text: "#047857", border: "#A7F3D0" }
+  };
+
+  tbody.innerHTML = flatRows.map((r, idx) => {
+    const kColor = katColors[r.kategori] || { bg: "#F1F5F9", text: "#334155", border: "#CBD5E1" };
+    
+    let badgeHtml = "";
+    let recoHtml = "";
+    if (r.status === "aman") {
+      badgeHtml = `<span class="badge-status-pemenuhan aman">Aman (${r.capaian.toFixed(0)}%)</span>`;
+      recoHtml = `<span style="font-size: 0.775rem; color: #16A34A; font-weight: 600;">Buffer stock daerah mencukupi</span>`;
+    } else if (r.status === "kurang") {
+      badgeHtml = `<span class="badge-status-pemenuhan kurang">Kurang (${r.capaian.toFixed(0)}%)</span>`;
+      recoHtml = `<span style="font-size: 0.775rem; color: #D97706; font-weight: 600;">Jadwalkan alokasi termin II</span>`;
+    } else {
+      badgeHtml = `<span class="badge-status-pemenuhan kritis">Kritis (${r.capaian.toFixed(0)}%)</span>`;
+      recoHtml = `<span style="font-size: 0.775rem; color: #DC2626; font-weight: 700;">Atensi Khusus: Prioritas penyaluran</span>`;
+    }
+
+    return `
+      <tr>
+        <td style="text-align: center; font-weight: 600; color: #64748B;">${idx + 1}</td>
+        <td style="font-weight: 700; color: #1E293B;">
+          ${r.daerah}
+          ${kabidSelectedWilayah === r.daerah ? `<span style="font-size: 0.7rem; color: #0E63AA; background: #E0F2FE; padding: 0.1rem 0.35rem; border-radius: 3px; margin-left: 0.3rem;">Terfilter</span>` : ""}
+        </td>
+        <td>
+          <span class="badge-kat-pill" style="background-color: ${kColor.bg}; color: ${kColor.text}; border: 1px solid ${kColor.border};">
+            ${r.kategori}
+          </span>
+        </td>
+        <td style="font-weight: 600;">${r.barang}</td>
+        <td class="num-cell">${r.diminta.toLocaleString('id-ID')}</td>
+        <td class="num-cell positive">${r.realisasi.toLocaleString('id-ID')}</td>
+        <td class="num-cell ${r.gap > 0 ? 'negative' : ''}">${r.gap.toLocaleString('id-ID')}</td>
+        <td style="text-align: center; font-weight: 700; color: ${r.capaian >= 80 ? '#16A34A' : (r.capaian >= 50 ? '#D97706' : '#DC2626')};">
+          ${r.capaian.toFixed(1)}%
+        </td>
+        <td style="text-align: center;">${badgeHtml}</td>
+        <td>${recoHtml}</td>
+      </tr>
+    `;
+  }).join("");
+
+  if (counterEl) {
+    counterEl.textContent = `Menampilkan ${flatRows.length} baris evaluasi komoditas penguatan daerah` + (kabidSelectedWilayah ? ` (${kabidSelectedWilayah})` : "");
+  }
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+// ========================================================
+// 9. VIEW KALAK (EKSEKUTIF STRATEGIS & FINANSIAL MAKRO RP)
+// ========================================================
+
+let kalakSelectedSumberDana = "ALL";
+let kalakSelectedTahun = "ALL";
+let chartKalakSumberAnggaranInstance = null;
+let chartKalakNilaiIndikatifInstance = null;
+
+function handleKalakFilterChange() {
+  const selDana = document.getElementById("kalak-filter-sumber-dana");
+  const selThn = document.getElementById("kalak-filter-tahun");
+  if (selDana) kalakSelectedSumberDana = selDana.value;
+  if (selThn) kalakSelectedTahun = selThn.value;
+  renderKalakView();
+}
+
+function formatRupiahSingkat(num) {
+  if (Math.abs(num) >= 1e9) {
+    return "Rp " + (num / 1e9).toFixed(2).replace(".", ",") + " Miliar";
+  }
+  if (Math.abs(num) >= 1e6) {
+    return "Rp " + (num / 1e6).toFixed(1).replace(".", ",") + " Juta";
+  }
+  return "Rp " + Math.round(num).toLocaleString("id-ID");
+}
+
+function formatRupiahLengkap(num) {
+  return "Rp " + Math.round(num).toLocaleString("id-ID");
+}
+
+// Render Utama Tampilan View KALAK
+function renderKalakView() {
+  const dataStore = window.ELUNA_OPERATOR_DATA;
+  if (!dataStore) return;
+
+  const rekap = dataStore.rekapFinansialMakro || {};
+  const allTx = dataStore.riwayatMutasiSemua || [];
+  const stokAwalList = dataStore.daftarStokAwalPerBarang || [];
+
+  // Filter transaksi berdasarkan pilihan KALAK
+  const filteredTx = allTx.filter(t => {
+    const matchDana = (kalakSelectedSumberDana === "ALL") || (t.sumberDana === kalakSelectedSumberDana);
+    const matchThn = (kalakSelectedTahun === "ALL") || (t.tahun === kalakSelectedTahun);
+    return matchDana && matchThn;
+  });
+
+  const filteredAwal = stokAwalList.filter(i => {
+    return (kalakSelectedSumberDana === "ALL") || (i.sumber === kalakSelectedSumberDana);
+  });
+
+  // Kalkulasi nilai finansial dinamis
+  const valMasuk = filteredTx.filter(t => t.jenis === "Masuk").reduce((acc, t) => acc + (t.nilaiTotal || 0), 0);
+  const valKeluar = filteredTx.filter(t => t.jenis === "Keluar").reduce((acc, t) => acc + (t.nilaiTotal || 0), 0);
+  const valAwal = filteredAwal.reduce((acc, i) => acc + (i.nilaiTotal || 0), 0);
+
+  const countBast = filteredTx.filter(t => t.jenis === "Masuk").length;
+  const countSj = filteredTx.filter(t => t.jenis === "Keluar").length;
+
+  // Koreksi penyesuaian makro BPBD Jabar
+  const baseKorTambah = rekap.koreksiTambahRp || 450000000;
+  const baseKorKurang = rekap.koreksiKurangRp || 285000000;
+  const korTambah = (kalakSelectedSumberDana === "ALL" && kalakSelectedTahun === "ALL") ? baseKorTambah : Math.round(baseKorTambah * (valMasuk / (rekap.totalNilaiPenerimaan || 1)));
+  const korKurang = (kalakSelectedSumberDana === "ALL" && kalakSelectedTahun === "ALL") ? baseKorKurang : Math.round(baseKorKurang * (valMasuk / (rekap.totalNilaiPenerimaan || 1)));
+
+  const valAkhir = valAwal + valMasuk + korTambah - korKurang - valKeluar;
+
+  // 1. Update 6 Kartu Finansial Makro
+  const elMasuk = document.getElementById("kpi-kalak-nilai-penerimaan");
+  if (elMasuk) elMasuk.textContent = formatRupiahSingkat(valMasuk);
+
+  const elBast = document.getElementById("kpi-kalak-bast-count");
+  if (elBast) elBast.textContent = `${countBast} BAST Masuk`;
+
+  const elKeluar = document.getElementById("kpi-kalak-nilai-distribusi");
+  if (elKeluar) elKeluar.textContent = formatRupiahSingkat(valKeluar);
+
+  const elSj = document.getElementById("kpi-kalak-sj-count");
+  if (elSj) elSj.textContent = `${countSj} Surat Jalan`;
+
+  const elAkhir = document.getElementById("kpi-kalak-nilai-stok-akhir");
+  if (elAkhir) elAkhir.textContent = formatRupiahSingkat(valAkhir);
+
+  const elAwalNote = document.getElementById("kpi-kalak-stok-awal-note");
+  if (elAwalNote) elAwalNote.textContent = `Awal: ${formatRupiahSingkat(valAwal)}`;
+
+  const elKorTambah = document.getElementById("kpi-kalak-koreksi-tambah");
+  if (elKorTambah) elKorTambah.textContent = `+${formatRupiahSingkat(korTambah)}`;
+
+  const elKorKurang = document.getElementById("kpi-kalak-koreksi-kurang");
+  if (elKorKurang) elKorKurang.textContent = `-${formatRupiahSingkat(korKurang)}`;
+
+  // Status risiko barang kadaluwarsa
+  const expItems = dataStore.daftarBarangKadaluwarsa || [];
+  const elExpSku = document.getElementById("kpi-kalak-sku-exp");
+  if (elExpSku) elExpSku.textContent = `${expItems.length} SKU`;
+
+  const totalNilaiExp = expItems.reduce((acc, x) => acc + (x.nilaiTotal || 0), 0);
+  const elExpVal = document.getElementById("kpi-kalak-exp-val-risk");
+  if (elExpVal) elExpVal.textContent = `Valuasi: ${formatRupiahSingkat(totalNilaiExp)}`;
+
+  // 2. Render 2 Grafik Utama Finansial
+  renderKalakCharts(dataStore, filteredTx);
+
+  // 3. Render Tabel Neraca Finansial 4 Kategori Barang
+  renderKalakNeracaTable(dataStore, valAwal, valMasuk, korTambah, korKurang, valKeluar, valAkhir);
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+// Inisialisasi & Render Grafik KALAK
+function renderKalakCharts(dataStore, filteredTx) {
+  // --- GRAFIK 1: NILAI BERDASARKAN SUMBER ANGGARAN (GROUPED BAR) ---
+  const canvas1 = document.getElementById("chartKalakSumberAnggaran");
+  if (canvas1) {
+    if (chartKalakSumberAnggaranInstance) {
+      chartKalakSumberAnggaranInstance.destroy();
+    }
+
+    const danaLabels = ["APBD Provinsi", "APBN (BNPB)", "CSR / Masyarakat"];
+    const danaKeys = ["APBD", "APBN", "CSR"];
+
+    const masukPerDana = danaKeys.map(k => {
+      return filteredTx.filter(t => t.jenis === "Masuk" && t.sumberDana === k).reduce((acc, t) => acc + (t.nilaiTotal || 0), 0);
+    });
+
+    const keluarPerDana = danaKeys.map(k => {
+      return filteredTx.filter(t => t.jenis === "Keluar" && t.sumberDana === k).reduce((acc, t) => acc + (t.nilaiTotal || 0), 0);
+    });
+
+    const ctx1 = canvas1.getContext("2d");
+    chartKalakSumberAnggaranInstance = new Chart(ctx1, {
+      type: "bar",
+      data: {
+        labels: danaLabels,
+        datasets: [
+          {
+            label: "Nilai Penerimaan Masuk (Rp)",
+            data: masukPerDana,
+            backgroundColor: "#10B981",
+            borderRadius: 4
+          },
+          {
+            label: "Nilai Penyaluran Keluar (Rp)",
+            data: keluarPerDana,
+            backgroundColor: "#F97316",
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "top",
+            labels: { font: { size: 11, weight: "600" } }
+          },
+          tooltip: {
+            callbacks: {
+              label: context => `${context.dataset.label}: Rp ${context.parsed.y.toLocaleString('id-ID')}`
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: val => "Rp " + (val / 1e9).toFixed(1) + " M",
+              font: { size: 10 }
+            },
+            grid: { color: "#F1F5F9" }
+          }
+        }
+      }
+    });
+  }
+
+  // --- GRAFIK 2: EVALUASI NILAI INDIKATIF LOGISTIK PER KAB/KOTA (MULTI-BAR) ---
+  const canvas2 = document.getElementById("chartKalakNilaiIndikatifDaerah");
+  if (canvas2) {
+    if (chartKalakNilaiIndikatifInstance) {
+      chartKalakNilaiIndikatifInstance.destroy();
+    }
+
+    const allReq = dataStore.daftarPermohonanDaerah || [];
+    const distTx = filteredTx.filter(t => t.jenis === "Keluar");
+    const masterDaerah = dataStore.kabKotaJabar || [];
+
+    const daerahStats = masterDaerah.map(d => {
+      const valMinta = allReq.filter(r => r.kabKota === d).reduce((acc, r) => acc + (r.estimasiNilai || 0), 0);
+      const valSalur = distTx.filter(t => t.kabKotaTujuan === d).reduce((acc, t) => acc + (t.nilaiTotal || 0), 0);
+      const paguAlokasi = Math.round(valMinta * 0.75); // Pagu indikatif provinsi ~75% usulan
+      return {
+        daerah: d.replace("Kabupaten ", "Kab. "),
+        valMinta,
+        paguAlokasi,
+        valSalur
+      };
+    });
+
+    daerahStats.sort((a, b) => b.valMinta - a.valMinta);
+    const top10 = daerahStats.slice(0, 10);
+
+    const labels = top10.map(d => d.daerah);
+    const dataMinta = top10.map(d => d.valMinta);
+    const dataPagu = top10.map(d => d.paguAlokasi);
+    const dataSalur = top10.map(d => d.valSalur);
+
+    const ctx2 = canvas2.getContext("2d");
+    chartKalakNilaiIndikatifInstance = new Chart(ctx2, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Nilai Usulan Permohonan (Rp)",
+            data: dataMinta,
+            backgroundColor: "#3B82F6",
+            borderRadius: 3
+          },
+          {
+            label: "Pagu Alokasi Indikatif (Rp)",
+            data: dataPagu,
+            backgroundColor: "#8B5CF6",
+            borderRadius: 3
+          },
+          {
+            label: "Nilai Distribusi Riil (Rp)",
+            data: dataSalur,
+            backgroundColor: "#10B981",
+            borderRadius: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "top",
+            labels: { font: { size: 10, weight: "600" } }
+          },
+          tooltip: {
+            callbacks: {
+              label: context => `${context.dataset.label}: Rp ${context.parsed.y.toLocaleString('id-ID')}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 9, weight: "600" } }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: val => "Rp " + (val / 1e6).toFixed(0) + " Jt",
+              font: { size: 10 }
+            },
+            grid: { color: "#F1F5F9" }
+          }
+        }
+      }
+    });
+  }
+}
+
+// Render Tabel Neraca Finansial 4 Kategori Barang (Laporan Pertanggungjawaban Aset)
+function renderKalakNeracaTable(dataStore, totAwal, totMasuk, korTambah, korKurang, totKeluar, totAkhir) {
+  const tbody = document.getElementById("tbody-neraca-kalak");
+  const tfoot = document.getElementById("tfoot-neraca-kalak");
+  if (!tbody || !tfoot) return;
+
+  const categories = ["Sandang", "Pangan", "Papan", "Logistik Lainnya"];
+  const katMaster = dataStore.kategoriMaster || [];
+  const allTx = dataStore.riwayatMutasiSemua || [];
+
+  const katColors = {
+    "Pangan": { bg: "#EFF6FF", text: "#1D4ED8", border: "#BFDBFE" },
+    "Sandang": { bg: "#F5F3FF", text: "#6D28D9", border: "#DDD6FE" },
+    "Papan": { bg: "#FFF7ED", text: "#C2410C", border: "#FED7AA" },
+    "Logistik Lainnya": { bg: "#ECFDF5", text: "#047857", border: "#A7F3D0" }
+  };
+
+  const rowsData = categories.map((kat, idx) => {
+    const kObj = katMaster.find(m => m.nama === kat);
+    const awalKat = kObj ? (kObj.nilaiStokAwal || 0) : 0;
+    const masukKat = allTx.filter(t => t.jenis === "Masuk" && t.kategori === kat).reduce((acc, t) => acc + (t.nilaiTotal || 0), 0);
+    const keluarKat = allTx.filter(t => t.jenis === "Keluar" && t.kategori === kat).reduce((acc, t) => acc + (t.nilaiTotal || 0), 0);
+    
+    // Proporsi pembagian koreksi makro
+    const proporsi = totMasuk > 0 ? (masukKat / totMasuk) : 0.25;
+    const korTambahKat = Math.round(korTambah * proporsi);
+    const korKurangKat = Math.round(korKurang * proporsi);
+    const korNettoKat = korTambahKat - korKurangKat;
+    
+    const akhirKat = awalKat + masukKat + korNettoKat - keluarKat;
+    const porsiAset = totAkhir > 0 ? ((akhirKat / totAkhir) * 100).toFixed(1) : "0.0";
+
+    return {
+      no: idx + 1,
+      kategori: kat,
+      awal: awalKat,
+      masuk: masukKat,
+      korNetto: korNettoKat,
+      keluar: keluarKat,
+      akhir: akhirKat,
+      porsi: porsiAset
+    };
+  });
+
+  tbody.innerHTML = rowsData.map(r => {
+    const kColor = katColors[r.kategori] || { bg: "#F1F5F9", text: "#334155", border: "#CBD5E1" };
+    return `
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #64748B;">${r.no}</td>
+        <td>
+          <span class="badge-kat-pill" style="background-color: ${kColor.bg}; color: ${kColor.text}; border: 1px solid ${kColor.border};">
+            ${r.kategori}
+          </span>
+        </td>
+        <td class="num-cell">${formatRupiahLengkap(r.awal)}</td>
+        <td class="num-cell positive">+${formatRupiahLengkap(r.masuk)}</td>
+        <td class="num-cell" style="color: ${r.korNetto >= 0 ? '#15803D' : '#DC2626'}; font-weight: 700;">
+          ${r.korNetto >= 0 ? '+' : ''}${formatRupiahLengkap(r.korNetto)}
+        </td>
+        <td class="num-cell negative">-${formatRupiahLengkap(r.keluar)}</td>
+        <td class="num-cell total-highlight">${formatRupiahLengkap(r.akhir)}</td>
+        <td style="text-align: center; font-weight: 700; color: #0E63AA;">
+          ${r.porsi}%
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  const totalKorNetto = korTambah - korKurang;
+  tfoot.innerHTML = `
+    <tr>
+      <td colspan="2" style="text-align: center; font-weight: 800; color: #0F172A;">
+        TOTAL VALUASI NERACA GUDANG
+      </td>
+      <td class="num-cell" style="font-weight: 800;">${formatRupiahLengkap(totAwal)}</td>
+      <td class="num-cell positive" style="font-weight: 800;">+${formatRupiahLengkap(totMasuk)}</td>
+      <td class="num-cell" style="font-weight: 800; color: ${totalKorNetto >= 0 ? '#15803D' : '#DC2626'};">
+        ${totalKorNetto >= 0 ? '+' : ''}${formatRupiahLengkap(totalKorNetto)}
+      </td>
+      <td class="num-cell negative" style="font-weight: 800;">-${formatRupiahLengkap(totKeluar)}</td>
+      <td class="num-cell total-highlight" style="font-size: 0.95rem; font-weight: 800; color: #0E63AA;">
+        ${formatRupiahLengkap(totAkhir)}
+      </td>
+      <td style="text-align: center; font-weight: 800; color: #0E63AA;">
+        100.0%
+      </td>
+    </tr>
+  `;
+}
+
+// Ekspor Neraca ke Berkas Excel (.xlsx) dengan SheetJS
+function exportNeracaKalakToExcel() {
+  if (typeof XLSX === "undefined") {
+    showToast("Pustaka SheetJS belum termuat sempurna");
+    return;
+  }
+
+  const table = document.getElementById("table-neraca-kalak");
+  if (!table) return;
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.table_to_sheet(table);
+  XLSX.utils.book_append_sheet(wb, ws, "Neraca Finansial Logistik");
+  
+  const fileName = `Neraca_Finansial_Logistik_BPBD_Jabar_${new Date().toISOString().slice(0, 10)}.xlsx`;
+  XLSX.writeFile(wb, fileName);
+  showToast(`Neraca berhasil diekspor ke: ${fileName}`);
+}
+

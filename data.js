@@ -1,22 +1,24 @@
 /**
- * DATABASE LOGISTIK BPBD PROVINSI JAWA BARAT (250 TRANSAKSI)
+ * DATABASE LOGISTIK BPBD PROVINSI JAWA BARAT
+ * Terpadu: View Operasional, View Kabid (Kuantitas Penguatan), View KALAK (Finansial Makro)
  * Disinkronkan secara otomatis dari 'database_logistik_bpbd_jabar.xlsx'
- * Terakhir diperbarui: 2026-10-03 22:23:20
+ * Terakhir diperbarui: 2026-10-25 22:31:55
  */
 
-const ELUNA_OPERATOR_DATA = {
+var ELUNA_OPERATOR_DATA = {
   "metadata": {
-    "systemName": "E-LUNA OPERATOR GUDANG",
-    "subTitle": "Sistem Pemantauan Operasional Logistik Kebencanaan",
+    "systemName": "E-LUNA LOGISTIK BPBD JAWA BARAT",
+    "subTitle": "Sistem Informasi & Pemantauan Operasional Logistik Kebencanaan",
     "instansi": "BPBD Provinsi Jawa Barat",
     "gudangAktif": "Gudang Logistik & Peralatan Provinsi Jawa Barat",
     "lokasi": "Jl. Soekarno-Hatta No. 629, Kota Bandung",
     "petugas": "Nadhif Althafu Rutama",
     "tanggalAcuanSistem": "2026-10-03",
-    "parameterXDefaultHari": 30,
+    "parameterXDefaultHari": 60,
     "sourceDatabase": "database_logistik_bpbd_jabar.xlsx",
     "totalEntries": 250,
-    "dateRange": "Januari 2025 - September 2026"
+    "dateRange": "Januari 2025 - September 2026",
+    "fokusOperasional": "Penguatan Cadangan Logistik Kesiapsiagaan Daerah Tahunan"
   },
   "kategoriMaster": [
     {
@@ -25,7 +27,8 @@ const ELUNA_OPERATOR_DATA = {
       "deskripsi": "Selimut, Matras, Sarung, Pakaian Dewasa, Pakaian Anak",
       "color": "#8B5CF6",
       "bgLight": "#F5F3FF",
-      "stokAwal": 53400,
+      "stokAwal": 5340,
+      "nilaiStokAwal": 474000000,
       "satuan": "Unit/Paket"
     },
     {
@@ -34,7 +37,8 @@ const ELUNA_OPERATOR_DATA = {
       "deskripsi": "Beras, Makanan Siap Saji, Susu Formula, Biskuit, Lauk Pauk, Air Mineral",
       "color": "#3B82F6",
       "bgLight": "#EFF6FF",
-      "stokAwal": 210000,
+      "stokAwal": 21000,
+      "nilaiStokAwal": 568800000,
       "satuan": "Unit/Paket"
     },
     {
@@ -43,7 +47,8 @@ const ELUNA_OPERATOR_DATA = {
       "deskripsi": "Tenda Pengungsi, Tenda Keluarga, Terpal, Seng",
       "color": "#F97316",
       "bgLight": "#FFF7ED",
-      "stokAwal": 21600,
+      "stokAwal": 2160,
+      "nilaiStokAwal": 1461000000,
       "satuan": "Unit"
     },
     {
@@ -52,38 +57,587 @@ const ELUNA_OPERATOR_DATA = {
       "deskripsi": "Perahu Karet, Genset, Chainsaw, Family Kit, Sanitasi Kit",
       "color": "#10B981",
       "bgLight": "#ECFDF5",
-      "stokAwal": 16890,
+      "stokAwal": 1689,
+      "nilaiStokAwal": 1455000000,
       "satuan": "Unit/Paket"
     }
   ],
   "kabKotaJabar": [
-    "Kab. Bogor",
-    "Kab. Sukabumi",
-    "Kab. Cianjur",
-    "Kab. Bandung",
-    "Kab. Garut",
-    "Kab. Tasikmalaya",
-    "Kab. Ciamis",
-    "Kab. Kuningan",
-    "Kab. Cirebon",
-    "Kab. Majalengka",
-    "Kab. Sumedang",
-    "Kab. Indramayu",
-    "Kab. Subang",
-    "Kab. Purwakarta",
-    "Kab. Karawang",
-    "Kab. Bekasi",
-    "Kab. Bandung Barat",
-    "Kab. Pangandaran",
-    "Kota Bogor",
-    "Kota Sukabumi",
+    "Kabupaten Bandung",
+    "Kabupaten Bandung Barat",
+    "Kabupaten Bekasi",
+    "Kabupaten Bogor",
+    "Kabupaten Ciamis",
+    "Kabupaten Cianjur",
+    "Kabupaten Cirebon",
+    "Kabupaten Garut",
+    "Kabupaten Indramayu",
+    "Kabupaten Karawang",
+    "Kabupaten Kuningan",
+    "Kabupaten Majalengka",
+    "Kabupaten Pangandaran",
+    "Kabupaten Purwakarta",
+    "Kabupaten Subang",
+    "Kabupaten Sukabumi",
+    "Kabupaten Sumedang",
+    "Kabupaten Tasikmalaya",
     "Kota Bandung",
-    "Kota Cirebon",
+    "Kota Banjar",
     "Kota Bekasi",
-    "Kota Depok",
+    "Kota Bogor",
     "Kota Cimahi",
-    "Kota Tasikmalaya",
-    "Kota Banjar"
+    "Kota Cirebon",
+    "Kota Depok",
+    "Kota Sukabumi",
+    "Kota Tasikmalaya"
+  ],
+  "rekapFinansialMakro": {
+    "totalNilaiStokAwal": 3958800000,
+    "totalNilaiPenerimaan": 34497500000,
+    "totalNilaiDistribusi": 4630500000,
+    "koreksiTambahRp": 450000000,
+    "koreksiKurangRp": 285000000,
+    "totalNilaiStokAkhir": 33990800000,
+    "sumberDana": {
+      "APBN": {
+        "nilaiAwal": 1316600000,
+        "nilaiMasuk": 13577000000,
+        "nilaiKeluar": 1572625000,
+        "nilaiAkhir": 13320975000
+      },
+      "APBD": {
+        "nilaiAwal": 1316600000,
+        "nilaiMasuk": 14830500000,
+        "nilaiKeluar": 1653125000,
+        "nilaiAkhir": 14493975000
+      },
+      "CSR": {
+        "nilaiAwal": 1325600000,
+        "nilaiMasuk": 6090000000,
+        "nilaiKeluar": 1404750000,
+        "nilaiAkhir": 6010850000
+      }
+    },
+    "neracaKategori": {
+      "Sandang": {
+        "nilaiAwal": 474000000,
+        "nilaiMasuk": 4047000000,
+        "koreksiTambah": 52790781,
+        "koreksiKurang": 33434161,
+        "koreksiNetto": 19356620,
+        "nilaiKeluar": 873375000,
+        "nilaiAkhir": 3666981620
+      },
+      "Pangan": {
+        "nilaiAwal": 568800000,
+        "nilaiMasuk": 6102500000,
+        "koreksiTambah": 79603594,
+        "koreksiKurang": 50415609,
+        "koreksiNetto": 29187985,
+        "nilaiKeluar": 666375000,
+        "nilaiAkhir": 6034112985
+      },
+      "Papan": {
+        "nilaiAwal": 1461000000,
+        "nilaiMasuk": 9661000000,
+        "koreksiTambah": 126022175,
+        "koreksiKurang": 79814044,
+        "koreksiNetto": 46208131,
+        "nilaiKeluar": 2176750000,
+        "nilaiAkhir": 8991458131
+      },
+      "Logistik Lainnya": {
+        "nilaiAwal": 1455000000,
+        "nilaiMasuk": 14687000000,
+        "koreksiTambah": 191583448,
+        "koreksiKurang": 121336183,
+        "koreksiNetto": 70247265,
+        "nilaiKeluar": 914000000,
+        "nilaiAkhir": 15298247265
+      }
+    }
+  },
+  "daftarStokAwalPerBarang": [
+    {
+      "sumber": "APBD",
+      "barang": "Chainsaw",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 10,
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 45000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Chainsaw",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 10,
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 45000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Chainsaw",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 10,
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 45000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Family Kit",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 300,
+      "hargaSatuan": 350000,
+      "nilaiTotal": 105000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Family Kit",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 300,
+      "hargaSatuan": 350000,
+      "nilaiTotal": 105000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Family Kit",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 300,
+      "hargaSatuan": 350000,
+      "nilaiTotal": 105000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Genset",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 8,
+      "hargaSatuan": 12500000,
+      "nilaiTotal": 100000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Genset",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 8,
+      "hargaSatuan": 12500000,
+      "nilaiTotal": 100000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Genset",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 8,
+      "hargaSatuan": 12500000,
+      "nilaiTotal": 100000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Perahu Karet",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 5,
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 175000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Perahu Karet",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 5,
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 175000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Perahu Karet",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 5,
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 175000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Sanitasi Kit",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 240,
+      "hargaSatuan": 250000,
+      "nilaiTotal": 60000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Sanitasi Kit",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 240,
+      "hargaSatuan": 250000,
+      "nilaiTotal": 60000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Sanitasi Kit",
+      "kategori": "Logistik Lainnya",
+      "stokAwal": 240,
+      "hargaSatuan": 250000,
+      "nilaiTotal": 60000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Air Mineral",
+      "kategori": "Pangan",
+      "stokAwal": 1200,
+      "hargaSatuan": 30000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Air Mineral",
+      "kategori": "Pangan",
+      "stokAwal": 1200,
+      "hargaSatuan": 30000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Air Mineral",
+      "kategori": "Pangan",
+      "stokAwal": 1200,
+      "hargaSatuan": 30000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Beras",
+      "kategori": "Pangan",
+      "stokAwal": 3000,
+      "hargaSatuan": 15000,
+      "nilaiTotal": 45000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Beras",
+      "kategori": "Pangan",
+      "stokAwal": 3000,
+      "hargaSatuan": 15000,
+      "nilaiTotal": 45000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Beras",
+      "kategori": "Pangan",
+      "stokAwal": 3000,
+      "hargaSatuan": 15000,
+      "nilaiTotal": 45000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Biskuit",
+      "kategori": "Pangan",
+      "stokAwal": 600,
+      "hargaSatuan": 25000,
+      "nilaiTotal": 15000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Biskuit",
+      "kategori": "Pangan",
+      "stokAwal": 600,
+      "hargaSatuan": 25000,
+      "nilaiTotal": 15000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Biskuit",
+      "kategori": "Pangan",
+      "stokAwal": 780,
+      "hargaSatuan": 25000,
+      "nilaiTotal": 19500000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Lauk Pauk",
+      "kategori": "Pangan",
+      "stokAwal": 900,
+      "hargaSatuan": 35000,
+      "nilaiTotal": 31500000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Lauk Pauk",
+      "kategori": "Pangan",
+      "stokAwal": 900,
+      "hargaSatuan": 35000,
+      "nilaiTotal": 31500000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Lauk Pauk",
+      "kategori": "Pangan",
+      "stokAwal": 900,
+      "hargaSatuan": 35000,
+      "nilaiTotal": 31500000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Makanan Siap Saji",
+      "kategori": "Pangan",
+      "stokAwal": 1000,
+      "hargaSatuan": 45000,
+      "nilaiTotal": 45000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Makanan Siap Saji",
+      "kategori": "Pangan",
+      "stokAwal": 1000,
+      "hargaSatuan": 45000,
+      "nilaiTotal": 45000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Makanan Siap Saji",
+      "kategori": "Pangan",
+      "stokAwal": 1000,
+      "hargaSatuan": 45000,
+      "nilaiTotal": 45000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Susu Formula",
+      "kategori": "Pangan",
+      "stokAwal": 240,
+      "hargaSatuan": 65000,
+      "nilaiTotal": 15600000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Susu Formula",
+      "kategori": "Pangan",
+      "stokAwal": 240,
+      "hargaSatuan": 65000,
+      "nilaiTotal": 15600000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Susu Formula",
+      "kategori": "Pangan",
+      "stokAwal": 240,
+      "hargaSatuan": 65000,
+      "nilaiTotal": 15600000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Seng",
+      "kategori": "Papan",
+      "stokAwal": 400,
+      "hargaSatuan": 90000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Seng",
+      "kategori": "Papan",
+      "stokAwal": 400,
+      "hargaSatuan": 90000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Seng",
+      "kategori": "Papan",
+      "stokAwal": 400,
+      "hargaSatuan": 90000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Tenda Keluarga",
+      "kategori": "Papan",
+      "stokAwal": 50,
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 160000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Tenda Keluarga",
+      "kategori": "Papan",
+      "stokAwal": 50,
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 160000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Tenda Keluarga",
+      "kategori": "Papan",
+      "stokAwal": 50,
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 160000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Tenda Pengungsi",
+      "kategori": "Papan",
+      "stokAwal": 30,
+      "hargaSatuan": 8500000,
+      "nilaiTotal": 255000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Tenda Pengungsi",
+      "kategori": "Papan",
+      "stokAwal": 30,
+      "hargaSatuan": 8500000,
+      "nilaiTotal": 255000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Tenda Pengungsi",
+      "kategori": "Papan",
+      "stokAwal": 30,
+      "hargaSatuan": 8500000,
+      "nilaiTotal": 255000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Terpal",
+      "kategori": "Papan",
+      "stokAwal": 240,
+      "hargaSatuan": 150000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Terpal",
+      "kategori": "Papan",
+      "stokAwal": 240,
+      "hargaSatuan": 150000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Terpal",
+      "kategori": "Papan",
+      "stokAwal": 240,
+      "hargaSatuan": 150000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Matras",
+      "kategori": "Sandang",
+      "stokAwal": 300,
+      "hargaSatuan": 120000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Matras",
+      "kategori": "Sandang",
+      "stokAwal": 300,
+      "hargaSatuan": 120000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Matras",
+      "kategori": "Sandang",
+      "stokAwal": 300,
+      "hargaSatuan": 120000,
+      "nilaiTotal": 36000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Pakaian Anak",
+      "kategori": "Sandang",
+      "stokAwal": 360,
+      "hargaSatuan": 75000,
+      "nilaiTotal": 27000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Pakaian Anak",
+      "kategori": "Sandang",
+      "stokAwal": 360,
+      "hargaSatuan": 75000,
+      "nilaiTotal": 27000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Pakaian Anak",
+      "kategori": "Sandang",
+      "stokAwal": 420,
+      "hargaSatuan": 75000,
+      "nilaiTotal": 31500000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Pakaian Dewasa",
+      "kategori": "Sandang",
+      "stokAwal": 500,
+      "hargaSatuan": 95000,
+      "nilaiTotal": 47500000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Pakaian Dewasa",
+      "kategori": "Sandang",
+      "stokAwal": 500,
+      "hargaSatuan": 95000,
+      "nilaiTotal": 47500000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Pakaian Dewasa",
+      "kategori": "Sandang",
+      "stokAwal": 500,
+      "hargaSatuan": 95000,
+      "nilaiTotal": 47500000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Sarung",
+      "kategori": "Sandang",
+      "stokAwal": 200,
+      "hargaSatuan": 60000,
+      "nilaiTotal": 12000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Sarung",
+      "kategori": "Sandang",
+      "stokAwal": 200,
+      "hargaSatuan": 60000,
+      "nilaiTotal": 12000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Sarung",
+      "kategori": "Sandang",
+      "stokAwal": 200,
+      "hargaSatuan": 60000,
+      "nilaiTotal": 12000000
+    },
+    {
+      "sumber": "APBD",
+      "barang": "Selimut",
+      "kategori": "Sandang",
+      "stokAwal": 400,
+      "hargaSatuan": 85000,
+      "nilaiTotal": 34000000
+    },
+    {
+      "sumber": "APBN",
+      "barang": "Selimut",
+      "kategori": "Sandang",
+      "stokAwal": 400,
+      "hargaSatuan": 85000,
+      "nilaiTotal": 34000000
+    },
+    {
+      "sumber": "CSR",
+      "barang": "Selimut",
+      "kategori": "Sandang",
+      "stokAwal": 400,
+      "hargaSatuan": 85000,
+      "nilaiTotal": 34000000
+    }
   ],
   "daftarBarangKadaluwarsa": [
     {
@@ -91,612 +645,1772 @@ const ELUNA_OPERATOR_DATA = {
       "kodeBarang": "LOG-PAN-001",
       "namaBarang": "Biskuit",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2350,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-05-20",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0039"
+      "noDokumen": "BAST-2025-IN-0039",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 58750000
     },
     {
       "id": "EXP-02",
       "kodeBarang": "LOG-PAN-002",
       "namaBarang": "Susu Formula",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 700,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-06-03",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0078"
+      "noDokumen": "BAST-2025-IN-0078",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 45500000
     },
     {
       "id": "EXP-03",
       "kodeBarang": "LOG-PAN-003",
       "namaBarang": "Susu Formula",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 600,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-06-04",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0029"
+      "noDokumen": "BAST-2025-IN-0029",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 39000000
     },
     {
       "id": "EXP-04",
       "kodeBarang": "LOG-PAN-004",
       "namaBarang": "Susu Formula",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 850,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-06-15",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0033"
+      "noDokumen": "BAST-2025-IN-0033",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 55250000
     },
     {
       "id": "EXP-05",
       "kodeBarang": "LOG-PAN-005",
       "namaBarang": "Susu Formula",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 650,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-07-22",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0100"
+      "noDokumen": "BAST-2025-IN-0100",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 42250000
     },
     {
       "id": "EXP-06",
       "kodeBarang": "LOG-PAN-006",
       "namaBarang": "Susu Formula",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 400,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-08-03",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "CSR",
-      "noDokumen": "BAST-2026-IN-0070"
+      "noDokumen": "BAST-2026-IN-0070",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 26000000
     },
     {
       "id": "EXP-07",
       "kodeBarang": "LOG-PAN-007",
       "namaBarang": "Makanan Siap Saji",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2900,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-09-02",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0021"
+      "noDokumen": "BAST-2025-IN-0021",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 130500000
     },
     {
       "id": "EXP-08",
       "kodeBarang": "LOG-PAN-008",
       "namaBarang": "Susu Formula",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 800,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-09-05",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2026-IN-0028"
+      "noDokumen": "BAST-2026-IN-0028",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 52000000
     },
     {
       "id": "EXP-09",
       "kodeBarang": "LOG-PAN-009",
       "namaBarang": "Makanan Siap Saji",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 4250,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-09-09",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0057"
+      "noDokumen": "BAST-2025-IN-0057",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 191250000
     },
     {
       "id": "EXP-10",
       "kodeBarang": "LOG-PAN-010",
       "namaBarang": "Susu Formula",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 350,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-10-11",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0114"
+      "noDokumen": "BAST-2025-IN-0114",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 22750000
     },
     {
       "id": "EXP-11",
       "kodeBarang": "LOG-PAN-011",
       "namaBarang": "Air Mineral",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 4900,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-10-17",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0092"
+      "noDokumen": "BAST-2025-IN-0092",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 147000000
     },
     {
       "id": "EXP-12",
       "kodeBarang": "LOG-PAN-012",
       "namaBarang": "Susu Formula",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 450,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-10-18",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2026-IN-0045"
+      "noDokumen": "BAST-2026-IN-0045",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 29250000
     },
     {
       "id": "EXP-13",
       "kodeBarang": "LOG-PAN-013",
       "namaBarang": "Beras",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2100,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-10-19",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0025"
+      "noDokumen": "BAST-2025-IN-0025",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 31500000
     },
     {
       "id": "EXP-14",
       "kodeBarang": "LOG-PAN-014",
       "namaBarang": "Beras",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 14750,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-10-24",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0101"
+      "noDokumen": "BAST-2025-IN-0101",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 221250000
     },
     {
       "id": "EXP-15",
       "kodeBarang": "LOG-PAN-015",
       "namaBarang": "Air Mineral",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 5400,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-10-26",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2026-IN-0054"
+      "noDokumen": "BAST-2026-IN-0054",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 162000000
     },
     {
       "id": "EXP-16",
       "kodeBarang": "LOG-PAN-016",
       "namaBarang": "Susu Formula",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 300,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-11-17",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "CSR",
-      "noDokumen": "BAST-2025-IN-0086"
+      "noDokumen": "BAST-2025-IN-0086",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 19500000
     },
     {
       "id": "EXP-17",
       "kodeBarang": "LOG-PAN-017",
       "namaBarang": "Makanan Siap Saji",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 3450,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-12-21",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "CSR",
-      "noDokumen": "BAST-2025-IN-0068"
+      "noDokumen": "BAST-2025-IN-0068",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 155250000
     },
     {
       "id": "EXP-18",
       "kodeBarang": "LOG-PAN-018",
       "namaBarang": "Beras",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 7650,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2026-12-28",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0018"
+      "noDokumen": "BAST-2025-IN-0018",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 114750000
     },
     {
       "id": "EXP-19",
       "kodeBarang": "LOG-PAN-019",
       "namaBarang": "Susu Formula",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 1050,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-01-11",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0079"
+      "noDokumen": "BAST-2025-IN-0079",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 68250000
     },
     {
       "id": "EXP-20",
       "kodeBarang": "LOG-PAN-020",
       "namaBarang": "Beras",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 7200,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-01-24",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0019"
+      "noDokumen": "BAST-2025-IN-0019",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 108000000
     },
     {
       "id": "EXP-21",
       "kodeBarang": "LOG-PAN-021",
       "namaBarang": "Biskuit",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 1800,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-02-10",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0115"
+      "noDokumen": "BAST-2025-IN-0115",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 45000000
     },
     {
       "id": "EXP-22",
       "kodeBarang": "LOG-PAN-022",
       "namaBarang": "Biskuit",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2100,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-02-12",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0091"
+      "noDokumen": "BAST-2025-IN-0091",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 52500000
     },
     {
       "id": "EXP-23",
       "kodeBarang": "LOG-PAN-023",
       "namaBarang": "Air Mineral",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 1050,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-02-24",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0030"
+      "noDokumen": "BAST-2025-IN-0030",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 31500000
     },
     {
       "id": "EXP-24",
       "kodeBarang": "LOG-LOG-024",
       "namaBarang": "Sanitasi Kit",
       "kategori": "Logistik Lainnya",
-      "jumlahStok": 1500,
+      "jumlahStok": 150,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-03-22",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "CSR",
-      "noDokumen": "BAST-2025-IN-0027"
+      "noDokumen": "BAST-2025-IN-0027",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 37500000
     },
     {
       "id": "EXP-25",
       "kodeBarang": "LOG-PAN-025",
       "namaBarang": "Makanan Siap Saji",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 1100,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-03-22",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0117"
+      "noDokumen": "BAST-2025-IN-0117",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 49500000
     },
     {
       "id": "EXP-26",
       "kodeBarang": "LOG-PAN-026",
       "namaBarang": "Makanan Siap Saji",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2550,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-03-28",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "CSR",
-      "noDokumen": "BAST-2025-IN-0067"
+      "noDokumen": "BAST-2025-IN-0067",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 114750000
     },
     {
       "id": "EXP-27",
       "kodeBarang": "LOG-LOG-027",
       "namaBarang": "Sanitasi Kit",
       "kategori": "Logistik Lainnya",
-      "jumlahStok": 1500,
+      "jumlahStok": 700,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-04-17",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0074"
+      "noDokumen": "BAST-2025-IN-0074",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 175000000
     },
     {
       "id": "EXP-28",
       "kodeBarang": "LOG-PAN-028",
       "namaBarang": "Makanan Siap Saji",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 1000,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-04-24",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0093"
+      "noDokumen": "BAST-2025-IN-0093",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 45000000
     },
     {
       "id": "EXP-29",
       "kodeBarang": "LOG-PAN-029",
       "namaBarang": "Beras",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 11750,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-05-08",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0077"
+      "noDokumen": "BAST-2025-IN-0077",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 176250000
     },
     {
       "id": "EXP-30",
       "kodeBarang": "LOG-PAN-030",
       "namaBarang": "Biskuit",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 1650,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-06-15",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2026-IN-0013"
+      "noDokumen": "BAST-2026-IN-0013",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 41250000
     },
     {
       "id": "EXP-31",
       "kodeBarang": "LOG-PAN-031",
       "namaBarang": "Susu Formula",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 250,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-06-18",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2026-IN-0010"
+      "noDokumen": "BAST-2026-IN-0010",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 16250000
     },
     {
       "id": "EXP-32",
       "kodeBarang": "LOG-PAN-032",
       "namaBarang": "Air Mineral",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 1350,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-06-20",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0012"
+      "noDokumen": "BAST-2025-IN-0012",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 40500000
     },
     {
       "id": "EXP-33",
       "kodeBarang": "LOG-PAN-033",
       "namaBarang": "Lauk Pauk",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 1400,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-07-01",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "CSR",
-      "noDokumen": "BAST-2026-IN-0030"
+      "noDokumen": "BAST-2026-IN-0030",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 49000000
     },
     {
       "id": "EXP-34",
       "kodeBarang": "LOG-PAN-034",
       "namaBarang": "Lauk Pauk",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 1250,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-07-25",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2025-IN-0116"
+      "noDokumen": "BAST-2025-IN-0116",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 43750000
     },
     {
       "id": "EXP-35",
       "kodeBarang": "LOG-PAN-035",
       "namaBarang": "Biskuit",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2300,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-07-25",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2026-IN-0053"
+      "noDokumen": "BAST-2026-IN-0053",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 57500000
     },
     {
       "id": "EXP-36",
       "kodeBarang": "LOG-LOG-036",
       "namaBarang": "Sanitasi Kit",
       "kategori": "Logistik Lainnya",
-      "jumlahStok": 1500,
+      "jumlahStok": 1100,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-07-26",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0087"
+      "noDokumen": "BAST-2025-IN-0087",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 275000000
     },
     {
       "id": "EXP-37",
       "kodeBarang": "LOG-PAN-037",
       "namaBarang": "Beras",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 1800,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-09-15",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2026-IN-0033"
+      "noDokumen": "BAST-2026-IN-0033",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 27000000
     },
     {
       "id": "EXP-38",
       "kodeBarang": "LOG-PAN-038",
       "namaBarang": "Lauk Pauk",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2450,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-09-17",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2026-IN-0023"
+      "noDokumen": "BAST-2026-IN-0023",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 85750000
     },
     {
       "id": "EXP-39",
       "kodeBarang": "LOG-PAN-039",
       "namaBarang": "Biskuit",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2850,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-10-06",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2026-IN-0048"
+      "noDokumen": "BAST-2026-IN-0048",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 71250000
     },
     {
       "id": "EXP-40",
       "kodeBarang": "LOG-LOG-040",
       "namaBarang": "Sanitasi Kit",
       "kategori": "Logistik Lainnya",
-      "jumlahStok": 1500,
+      "jumlahStok": 850,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-10-09",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "CSR",
-      "noDokumen": "BAST-2026-IN-0011"
+      "noDokumen": "BAST-2026-IN-0011",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 212500000
     },
     {
       "id": "EXP-41",
       "kodeBarang": "LOG-PAN-041",
       "namaBarang": "Lauk Pauk",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 3400,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-11-11",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2026-IN-0021"
+      "noDokumen": "BAST-2026-IN-0021",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 119000000
     },
     {
       "id": "EXP-42",
       "kodeBarang": "LOG-PAN-042",
       "namaBarang": "Air Mineral",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 4050,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2027-11-17",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0066"
+      "noDokumen": "BAST-2025-IN-0066",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 121500000
     },
     {
       "id": "EXP-43",
       "kodeBarang": "LOG-PAN-043",
       "namaBarang": "Lauk Pauk",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2750,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2028-01-05",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2026-IN-0052"
+      "noDokumen": "BAST-2026-IN-0052",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 96250000
     },
     {
       "id": "EXP-44",
       "kodeBarang": "LOG-PAN-044",
       "namaBarang": "Biskuit",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 1950,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2028-01-24",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2026-IN-0078"
+      "noDokumen": "BAST-2026-IN-0078",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 48750000
     },
     {
       "id": "EXP-45",
       "kodeBarang": "LOG-PAN-045",
       "namaBarang": "Air Mineral",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 4300,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2028-02-03",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "CSR",
-      "noDokumen": "BAST-2025-IN-0076"
+      "noDokumen": "BAST-2025-IN-0076",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 129000000
     },
     {
       "id": "EXP-46",
       "kodeBarang": "LOG-LOG-046",
       "namaBarang": "Sanitasi Kit",
       "kategori": "Logistik Lainnya",
-      "jumlahStok": 1500,
+      "jumlahStok": 1050,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2028-02-15",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2026-IN-0046"
+      "noDokumen": "BAST-2026-IN-0046",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 262500000
     },
     {
       "id": "EXP-47",
       "kodeBarang": "LOG-PAN-047",
       "namaBarang": "Air Mineral",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2200,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2028-02-22",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2025-IN-0107"
+      "noDokumen": "BAST-2025-IN-0107",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 66000000
     },
     {
       "id": "EXP-48",
       "kodeBarang": "LOG-PAN-048",
       "namaBarang": "Makanan Siap Saji",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 4700,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2028-02-26",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2026-IN-0067"
+      "noDokumen": "BAST-2026-IN-0067",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 211500000
     },
     {
       "id": "EXP-49",
       "kodeBarang": "LOG-PAN-049",
       "namaBarang": "Makanan Siap Saji",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2650,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2028-03-01",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2026-IN-0068"
+      "noDokumen": "BAST-2026-IN-0068",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 119250000
     },
     {
       "id": "EXP-50",
       "kodeBarang": "LOG-PAN-050",
       "namaBarang": "Air Mineral",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 5950,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2028-11-17",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBD",
-      "noDokumen": "BAST-2026-IN-0061"
+      "noDokumen": "BAST-2026-IN-0061",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 178500000
     },
     {
       "id": "EXP-51",
       "kodeBarang": "LOG-PAN-051",
       "namaBarang": "Air Mineral",
       "kategori": "Pangan",
-      "jumlahStok": 1500,
+      "jumlahStok": 2550,
       "satuan": "Unit/Paket",
       "tglKadaluwarsaAsli": "2028-11-20",
       "lokasiGudang": "Gudang Induk BPBD Jawa Barat",
       "sumber": "APBN",
-      "noDokumen": "BAST-2026-IN-0064"
+      "noDokumen": "BAST-2026-IN-0064",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 76500000
+    }
+  ],
+  "daftarPermohonanDaerah": [
+    {
+      "id": "REQ-0001",
+      "noSurat": "360/001/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-20",
+      "kabKota": "Kabupaten Bandung",
+      "kategori": "Pangan",
+      "barang": "Beras",
+      "jumlahDiminta": 760,
+      "hargaSatuan": 15000,
+      "estimasiNilai": 11400000
+    },
+    {
+      "id": "REQ-0002",
+      "noSurat": "360/002/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-20",
+      "kabKota": "Kabupaten Bandung",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 760,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 64600000
+    },
+    {
+      "id": "REQ-0003",
+      "noSurat": "360/005/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-17",
+      "kabKota": "Kabupaten Bandung Barat",
+      "kategori": "Pangan",
+      "barang": "Lauk Pauk",
+      "jumlahDiminta": 480,
+      "hargaSatuan": 35000,
+      "estimasiNilai": 16800000
+    },
+    {
+      "id": "REQ-0004",
+      "noSurat": "360/006/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-23",
+      "kabKota": "Kabupaten Bekasi",
+      "kategori": "Pangan",
+      "barang": "Beras",
+      "jumlahDiminta": 3940,
+      "hargaSatuan": 15000,
+      "estimasiNilai": 59100000
+    },
+    {
+      "id": "REQ-0005",
+      "noSurat": "360/007/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-22",
+      "kabKota": "Kabupaten Bekasi",
+      "kategori": "Logistik Lainnya",
+      "barang": "Chainsaw",
+      "jumlahDiminta": 10,
+      "hargaSatuan": 4500000,
+      "estimasiNilai": 45000000
+    },
+    {
+      "id": "REQ-0006",
+      "noSurat": "360/009/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-22",
+      "kabKota": "Kabupaten Bogor",
+      "kategori": "Sandang",
+      "barang": "Pakaian Anak",
+      "jumlahDiminta": 820,
+      "hargaSatuan": 75000,
+      "estimasiNilai": 61500000
+    },
+    {
+      "id": "REQ-0007",
+      "noSurat": "360/012/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-24",
+      "kabKota": "Kabupaten Ciamis",
+      "kategori": "Pangan",
+      "barang": "Beras",
+      "jumlahDiminta": 240,
+      "hargaSatuan": 15000,
+      "estimasiNilai": 3600000
+    },
+    {
+      "id": "REQ-0008",
+      "noSurat": "360/013/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-16",
+      "kabKota": "Kabupaten Ciamis",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 240,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 20400000
+    },
+    {
+      "id": "REQ-0009",
+      "noSurat": "360/016/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-24",
+      "kabKota": "Kabupaten Cianjur",
+      "kategori": "Pangan",
+      "barang": "Beras",
+      "jumlahDiminta": 750,
+      "hargaSatuan": 15000,
+      "estimasiNilai": 11250000
+    },
+    {
+      "id": "REQ-0010",
+      "noSurat": "360/017/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-17",
+      "kabKota": "Kabupaten Cianjur",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 750,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 63750000
+    },
+    {
+      "id": "REQ-0011",
+      "noSurat": "360/020/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-17",
+      "kabKota": "Kabupaten Cirebon",
+      "kategori": "Pangan",
+      "barang": "Susu Formula",
+      "jumlahDiminta": 1110,
+      "hargaSatuan": 65000,
+      "estimasiNilai": 72150000
+    },
+    {
+      "id": "REQ-0012",
+      "noSurat": "360/022/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-16",
+      "kabKota": "Kabupaten Garut",
+      "kategori": "Papan",
+      "barang": "Terpal",
+      "jumlahDiminta": 210,
+      "hargaSatuan": 150000,
+      "estimasiNilai": 31500000
+    },
+    {
+      "id": "REQ-0013",
+      "noSurat": "360/024/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-23",
+      "kabKota": "Kabupaten Indramayu",
+      "kategori": "Pangan",
+      "barang": "Biskuit",
+      "jumlahDiminta": 1260,
+      "hargaSatuan": 25000,
+      "estimasiNilai": 31500000
+    },
+    {
+      "id": "REQ-0014",
+      "noSurat": "360/025/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-15",
+      "kabKota": "Kabupaten Indramayu",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 1060,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 90100000
+    },
+    {
+      "id": "REQ-0015",
+      "noSurat": "360/026/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-19",
+      "kabKota": "Kabupaten Karawang",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 1670,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 141950000
+    },
+    {
+      "id": "REQ-0016",
+      "noSurat": "360/027/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-16",
+      "kabKota": "Kabupaten Karawang",
+      "kategori": "Papan",
+      "barang": "Tenda Pengungsi",
+      "jumlahDiminta": 130,
+      "hargaSatuan": 8500000,
+      "estimasiNilai": 1105000000
+    },
+    {
+      "id": "REQ-0017",
+      "noSurat": "360/029/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-24",
+      "kabKota": "Kabupaten Kuningan",
+      "kategori": "Pangan",
+      "barang": "Beras",
+      "jumlahDiminta": 500,
+      "hargaSatuan": 15000,
+      "estimasiNilai": 7500000
+    },
+    {
+      "id": "REQ-0018",
+      "noSurat": "360/030/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-21",
+      "kabKota": "Kabupaten Kuningan",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 500,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 42500000
+    },
+    {
+      "id": "REQ-0019",
+      "noSurat": "360/033/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-16",
+      "kabKota": "Kabupaten Majalengka",
+      "kategori": "Sandang",
+      "barang": "Matras",
+      "jumlahDiminta": 600,
+      "hargaSatuan": 120000,
+      "estimasiNilai": 72000000
+    },
+    {
+      "id": "REQ-0020",
+      "noSurat": "360/039/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-24",
+      "kabKota": "Kabupaten Subang",
+      "kategori": "Sandang",
+      "barang": "Pakaian Anak",
+      "jumlahDiminta": 350,
+      "hargaSatuan": 75000,
+      "estimasiNilai": 26250000
+    },
+    {
+      "id": "REQ-0021",
+      "noSurat": "360/040/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-20",
+      "kabKota": "Kabupaten Subang",
+      "kategori": "Papan",
+      "barang": "Terpal",
+      "jumlahDiminta": 350,
+      "hargaSatuan": 150000,
+      "estimasiNilai": 52500000
+    },
+    {
+      "id": "REQ-0022",
+      "noSurat": "360/042/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-18",
+      "kabKota": "Kabupaten Subang",
+      "kategori": "Pangan",
+      "barang": "Beras",
+      "jumlahDiminta": 0,
+      "hargaSatuan": 15000,
+      "estimasiNilai": 0
+    },
+    {
+      "id": "REQ-0023",
+      "noSurat": "360/043/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-18",
+      "kabKota": "Kabupaten Subang",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 0,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 0
+    },
+    {
+      "id": "REQ-0024",
+      "noSurat": "360/045/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-15",
+      "kabKota": "Kabupaten Sukabumi",
+      "kategori": "Papan",
+      "barang": "Tenda Keluarga",
+      "jumlahDiminta": 80,
+      "hargaSatuan": 3200000,
+      "estimasiNilai": 256000000
+    },
+    {
+      "id": "REQ-0025",
+      "noSurat": "360/046/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-16",
+      "kabKota": "Kabupaten Sukabumi",
+      "kategori": "Pangan",
+      "barang": "Makanan Siap Saji",
+      "jumlahDiminta": 2150,
+      "hargaSatuan": 45000,
+      "estimasiNilai": 96750000
+    },
+    {
+      "id": "REQ-0026",
+      "noSurat": "360/048/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-22",
+      "kabKota": "Kabupaten Sumedang",
+      "kategori": "Pangan",
+      "barang": "Beras",
+      "jumlahDiminta": 480,
+      "hargaSatuan": 15000,
+      "estimasiNilai": 7200000
+    },
+    {
+      "id": "REQ-0027",
+      "noSurat": "360/049/BPBD-KAB/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-21",
+      "kabKota": "Kabupaten Sumedang",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 480,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 40800000
+    },
+    {
+      "id": "REQ-0028",
+      "noSurat": "360/054/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-21",
+      "kabKota": "Kota Bandung",
+      "kategori": "Pangan",
+      "barang": "Susu Formula",
+      "jumlahDiminta": 670,
+      "hargaSatuan": 65000,
+      "estimasiNilai": 43550000
+    },
+    {
+      "id": "REQ-0029",
+      "noSurat": "360/056/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-24",
+      "kabKota": "Kota Bandung",
+      "kategori": "Pangan",
+      "barang": "Beras",
+      "jumlahDiminta": 0,
+      "hargaSatuan": 15000,
+      "estimasiNilai": 0
+    },
+    {
+      "id": "REQ-0030",
+      "noSurat": "360/057/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-25",
+      "kabKota": "Kota Bandung",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 0,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 0
+    },
+    {
+      "id": "REQ-0031",
+      "noSurat": "360/060/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-23",
+      "kabKota": "Kota Banjar",
+      "kategori": "Pangan",
+      "barang": "Lauk Pauk",
+      "jumlahDiminta": 1320,
+      "hargaSatuan": 35000,
+      "estimasiNilai": 46200000
+    },
+    {
+      "id": "REQ-0032",
+      "noSurat": "360/063/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-21",
+      "kabKota": "Kota Banjar",
+      "kategori": "Pangan",
+      "barang": "Beras",
+      "jumlahDiminta": 0,
+      "hargaSatuan": 15000,
+      "estimasiNilai": 0
+    },
+    {
+      "id": "REQ-0033",
+      "noSurat": "360/064/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-15",
+      "kabKota": "Kota Banjar",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 0,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 0
+    },
+    {
+      "id": "REQ-0034",
+      "noSurat": "360/068/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-18",
+      "kabKota": "Kota Bekasi",
+      "kategori": "Pangan",
+      "barang": "Beras",
+      "jumlahDiminta": 340,
+      "hargaSatuan": 15000,
+      "estimasiNilai": 5100000
+    },
+    {
+      "id": "REQ-0035",
+      "noSurat": "360/069/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-16",
+      "kabKota": "Kota Bekasi",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 340,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 28900000
+    },
+    {
+      "id": "REQ-0036",
+      "noSurat": "360/072/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-20",
+      "kabKota": "Kota Bogor",
+      "kategori": "Papan",
+      "barang": "Terpal",
+      "jumlahDiminta": 740,
+      "hargaSatuan": 150000,
+      "estimasiNilai": 111000000
+    },
+    {
+      "id": "REQ-0037",
+      "noSurat": "360/075/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-15",
+      "kabKota": "Kota Cimahi",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 560,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 196000000
+    },
+    {
+      "id": "REQ-0038",
+      "noSurat": "360/078/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-20",
+      "kabKota": "Kota Cirebon",
+      "kategori": "Sandang",
+      "barang": "Matras",
+      "jumlahDiminta": 1070,
+      "hargaSatuan": 120000,
+      "estimasiNilai": 128400000
+    },
+    {
+      "id": "REQ-0039",
+      "noSurat": "360/079/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-15",
+      "kabKota": "Kota Depok",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 880,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 308000000
+    },
+    {
+      "id": "REQ-0040",
+      "noSurat": "360/080/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-15",
+      "kabKota": "Kota Depok",
+      "kategori": "Pangan",
+      "barang": "Biskuit",
+      "jumlahDiminta": 1790,
+      "hargaSatuan": 25000,
+      "estimasiNilai": 44750000
+    },
+    {
+      "id": "REQ-0041",
+      "noSurat": "360/082/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-20",
+      "kabKota": "Kota Sukabumi",
+      "kategori": "Sandang",
+      "barang": "Matras",
+      "jumlahDiminta": 440,
+      "hargaSatuan": 120000,
+      "estimasiNilai": 52800000
+    },
+    {
+      "id": "REQ-0042",
+      "noSurat": "360/085/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-23",
+      "kabKota": "Kota Tasikmalaya",
+      "kategori": "Pangan",
+      "barang": "Beras",
+      "jumlahDiminta": 340,
+      "hargaSatuan": 15000,
+      "estimasiNilai": 5100000
+    },
+    {
+      "id": "REQ-0043",
+      "noSurat": "360/086/BPBD-KOTA/I/2025",
+      "tahunAnggaran": 2025,
+      "tanggalPermohonan": "2025-01-24",
+      "kabKota": "Kota Tasikmalaya",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 340,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 28900000
+    },
+    {
+      "id": "REQ-0044",
+      "noSurat": "360/003/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-17",
+      "kabKota": "Kabupaten Bandung",
+      "kategori": "Pangan",
+      "barang": "Makanan Siap Saji",
+      "jumlahDiminta": 760,
+      "hargaSatuan": 45000,
+      "estimasiNilai": 34200000
+    },
+    {
+      "id": "REQ-0045",
+      "noSurat": "360/004/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-23",
+      "kabKota": "Kabupaten Bandung",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 740,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 259000000
+    },
+    {
+      "id": "REQ-0046",
+      "noSurat": "360/008/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-15",
+      "kabKota": "Kabupaten Bekasi",
+      "kategori": "Papan",
+      "barang": "Tenda Keluarga",
+      "jumlahDiminta": 120,
+      "hargaSatuan": 3200000,
+      "estimasiNilai": 384000000
+    },
+    {
+      "id": "REQ-0047",
+      "noSurat": "360/010/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-18",
+      "kabKota": "Kabupaten Bogor",
+      "kategori": "Pangan",
+      "barang": "Air Mineral",
+      "jumlahDiminta": 4150,
+      "hargaSatuan": 30000,
+      "estimasiNilai": 124500000
+    },
+    {
+      "id": "REQ-0048",
+      "noSurat": "360/011/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-25",
+      "kabKota": "Kabupaten Ciamis",
+      "kategori": "Papan",
+      "barang": "Terpal",
+      "jumlahDiminta": 750,
+      "hargaSatuan": 150000,
+      "estimasiNilai": 112500000
+    },
+    {
+      "id": "REQ-0049",
+      "noSurat": "360/014/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-24",
+      "kabKota": "Kabupaten Ciamis",
+      "kategori": "Pangan",
+      "barang": "Makanan Siap Saji",
+      "jumlahDiminta": 240,
+      "hargaSatuan": 45000,
+      "estimasiNilai": 10800000
+    },
+    {
+      "id": "REQ-0050",
+      "noSurat": "360/015/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-23",
+      "kabKota": "Kabupaten Ciamis",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 230,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 80500000
+    },
+    {
+      "id": "REQ-0051",
+      "noSurat": "360/018/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-15",
+      "kabKota": "Kabupaten Cianjur",
+      "kategori": "Pangan",
+      "barang": "Makanan Siap Saji",
+      "jumlahDiminta": 750,
+      "hargaSatuan": 45000,
+      "estimasiNilai": 33750000
+    },
+    {
+      "id": "REQ-0052",
+      "noSurat": "360/019/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-25",
+      "kabKota": "Kabupaten Cianjur",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 750,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 262500000
+    },
+    {
+      "id": "REQ-0053",
+      "noSurat": "360/021/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-18",
+      "kabKota": "Kabupaten Cirebon",
+      "kategori": "Papan",
+      "barang": "Terpal",
+      "jumlahDiminta": 360,
+      "hargaSatuan": 150000,
+      "estimasiNilai": 54000000
+    },
+    {
+      "id": "REQ-0054",
+      "noSurat": "360/023/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-20",
+      "kabKota": "Kabupaten Garut",
+      "kategori": "Pangan",
+      "barang": "Air Mineral",
+      "jumlahDiminta": 3200,
+      "hargaSatuan": 30000,
+      "estimasiNilai": 96000000
+    },
+    {
+      "id": "REQ-0055",
+      "noSurat": "360/028/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-22",
+      "kabKota": "Kabupaten Karawang",
+      "kategori": "Sandang",
+      "barang": "Pakaian Anak",
+      "jumlahDiminta": 230,
+      "hargaSatuan": 75000,
+      "estimasiNilai": 17250000
+    },
+    {
+      "id": "REQ-0056",
+      "noSurat": "360/031/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-21",
+      "kabKota": "Kabupaten Kuningan",
+      "kategori": "Pangan",
+      "barang": "Makanan Siap Saji",
+      "jumlahDiminta": 500,
+      "hargaSatuan": 45000,
+      "estimasiNilai": 22500000
+    },
+    {
+      "id": "REQ-0057",
+      "noSurat": "360/032/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-18",
+      "kabKota": "Kabupaten Kuningan",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 500,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 175000000
+    },
+    {
+      "id": "REQ-0058",
+      "noSurat": "360/034/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-19",
+      "kabKota": "Kabupaten Majalengka",
+      "kategori": "Sandang",
+      "barang": "Matras",
+      "jumlahDiminta": 1030,
+      "hargaSatuan": 120000,
+      "estimasiNilai": 123600000
+    },
+    {
+      "id": "REQ-0059",
+      "noSurat": "360/035/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-25",
+      "kabKota": "Kabupaten Majalengka",
+      "kategori": "Logistik Lainnya",
+      "barang": "Chainsaw",
+      "jumlahDiminta": 50,
+      "hargaSatuan": 4500000,
+      "estimasiNilai": 225000000
+    },
+    {
+      "id": "REQ-0060",
+      "noSurat": "360/036/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-19",
+      "kabKota": "Kabupaten Majalengka",
+      "kategori": "Papan",
+      "barang": "Tenda Keluarga",
+      "jumlahDiminta": 190,
+      "hargaSatuan": 3200000,
+      "estimasiNilai": 608000000
+    },
+    {
+      "id": "REQ-0061",
+      "noSurat": "360/037/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-20",
+      "kabKota": "Kabupaten Pangandaran",
+      "kategori": "Pangan",
+      "barang": "Biskuit",
+      "jumlahDiminta": 1560,
+      "hargaSatuan": 25000,
+      "estimasiNilai": 39000000
+    },
+    {
+      "id": "REQ-0062",
+      "noSurat": "360/038/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-21",
+      "kabKota": "Kabupaten Purwakarta",
+      "kategori": "Sandang",
+      "barang": "Pakaian Anak",
+      "jumlahDiminta": 1550,
+      "hargaSatuan": 75000,
+      "estimasiNilai": 116250000
+    },
+    {
+      "id": "REQ-0063",
+      "noSurat": "360/041/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-15",
+      "kabKota": "Kabupaten Subang",
+      "kategori": "Pangan",
+      "barang": "Makanan Siap Saji",
+      "jumlahDiminta": 2410,
+      "hargaSatuan": 45000,
+      "estimasiNilai": 108450000
+    },
+    {
+      "id": "REQ-0064",
+      "noSurat": "360/044/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-15",
+      "kabKota": "Kabupaten Subang",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 10,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 3500000
+    },
+    {
+      "id": "REQ-0065",
+      "noSurat": "360/047/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-17",
+      "kabKota": "Kabupaten Sukabumi",
+      "kategori": "Sandang",
+      "barang": "Matras",
+      "jumlahDiminta": 440,
+      "hargaSatuan": 120000,
+      "estimasiNilai": 52800000
+    },
+    {
+      "id": "REQ-0066",
+      "noSurat": "360/050/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-17",
+      "kabKota": "Kabupaten Sumedang",
+      "kategori": "Pangan",
+      "barang": "Makanan Siap Saji",
+      "jumlahDiminta": 480,
+      "hargaSatuan": 45000,
+      "estimasiNilai": 21600000
+    },
+    {
+      "id": "REQ-0067",
+      "noSurat": "360/051/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-25",
+      "kabKota": "Kabupaten Sumedang",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 460,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 161000000
+    },
+    {
+      "id": "REQ-0068",
+      "noSurat": "360/052/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-18",
+      "kabKota": "Kabupaten Tasikmalaya",
+      "kategori": "Sandang",
+      "barang": "Selimut",
+      "jumlahDiminta": 990,
+      "hargaSatuan": 85000,
+      "estimasiNilai": 84150000
+    },
+    {
+      "id": "REQ-0069",
+      "noSurat": "360/053/BPBD-KAB/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-19",
+      "kabKota": "Kabupaten Tasikmalaya",
+      "kategori": "Sandang",
+      "barang": "Pakaian Dewasa",
+      "jumlahDiminta": 910,
+      "hargaSatuan": 95000,
+      "estimasiNilai": 86450000
+    },
+    {
+      "id": "REQ-0070",
+      "noSurat": "360/055/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-22",
+      "kabKota": "Kota Bandung",
+      "kategori": "Logistik Lainnya",
+      "barang": "Chainsaw",
+      "jumlahDiminta": 20,
+      "hargaSatuan": 4500000,
+      "estimasiNilai": 90000000
+    },
+    {
+      "id": "REQ-0071",
+      "noSurat": "360/058/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-22",
+      "kabKota": "Kota Bandung",
+      "kategori": "Pangan",
+      "barang": "Makanan Siap Saji",
+      "jumlahDiminta": 0,
+      "hargaSatuan": 45000,
+      "estimasiNilai": 0
+    },
+    {
+      "id": "REQ-0072",
+      "noSurat": "360/059/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-23",
+      "kabKota": "Kota Bandung",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 10,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 3500000
+    },
+    {
+      "id": "REQ-0073",
+      "noSurat": "360/061/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-24",
+      "kabKota": "Kota Banjar",
+      "kategori": "Logistik Lainnya",
+      "barang": "Perahu Karet",
+      "jumlahDiminta": 0,
+      "hargaSatuan": 35000000,
+      "estimasiNilai": 0
+    },
+    {
+      "id": "REQ-0074",
+      "noSurat": "360/062/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-17",
+      "kabKota": "Kota Banjar",
+      "kategori": "Sandang",
+      "barang": "Pakaian Dewasa",
+      "jumlahDiminta": 1290,
+      "hargaSatuan": 95000,
+      "estimasiNilai": 122550000
+    },
+    {
+      "id": "REQ-0075",
+      "noSurat": "360/065/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-15",
+      "kabKota": "Kota Banjar",
+      "kategori": "Pangan",
+      "barang": "Makanan Siap Saji",
+      "jumlahDiminta": 0,
+      "hargaSatuan": 45000,
+      "estimasiNilai": 0
+    },
+    {
+      "id": "REQ-0076",
+      "noSurat": "360/066/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-16",
+      "kabKota": "Kota Banjar",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 10,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 3500000
+    },
+    {
+      "id": "REQ-0077",
+      "noSurat": "360/067/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-16",
+      "kabKota": "Kota Bekasi",
+      "kategori": "Logistik Lainnya",
+      "barang": "Chainsaw",
+      "jumlahDiminta": 150,
+      "hargaSatuan": 4500000,
+      "estimasiNilai": 675000000
+    },
+    {
+      "id": "REQ-0078",
+      "noSurat": "360/070/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-25",
+      "kabKota": "Kota Bekasi",
+      "kategori": "Pangan",
+      "barang": "Makanan Siap Saji",
+      "jumlahDiminta": 340,
+      "hargaSatuan": 45000,
+      "estimasiNilai": 15300000
+    },
+    {
+      "id": "REQ-0079",
+      "noSurat": "360/071/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-20",
+      "kabKota": "Kota Bekasi",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 330,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 115500000
+    },
+    {
+      "id": "REQ-0080",
+      "noSurat": "360/073/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-25",
+      "kabKota": "Kota Bogor",
+      "kategori": "Papan",
+      "barang": "Seng",
+      "jumlahDiminta": 1000,
+      "hargaSatuan": 90000,
+      "estimasiNilai": 90000000
+    },
+    {
+      "id": "REQ-0081",
+      "noSurat": "360/074/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-20",
+      "kabKota": "Kota Bogor",
+      "kategori": "Papan",
+      "barang": "Tenda Pengungsi",
+      "jumlahDiminta": 30,
+      "hargaSatuan": 8500000,
+      "estimasiNilai": 255000000
+    },
+    {
+      "id": "REQ-0082",
+      "noSurat": "360/076/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-23",
+      "kabKota": "Kota Cimahi",
+      "kategori": "Sandang",
+      "barang": "Sarung",
+      "jumlahDiminta": 830,
+      "hargaSatuan": 60000,
+      "estimasiNilai": 49800000
+    },
+    {
+      "id": "REQ-0083",
+      "noSurat": "360/077/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-21",
+      "kabKota": "Kota Cimahi",
+      "kategori": "Pangan",
+      "barang": "Biskuit",
+      "jumlahDiminta": 320,
+      "hargaSatuan": 25000,
+      "estimasiNilai": 8000000
+    },
+    {
+      "id": "REQ-0084",
+      "noSurat": "360/081/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-17",
+      "kabKota": "Kota Depok",
+      "kategori": "Sandang",
+      "barang": "Sarung",
+      "jumlahDiminta": 210,
+      "hargaSatuan": 60000,
+      "estimasiNilai": 12600000
+    },
+    {
+      "id": "REQ-0085",
+      "noSurat": "360/083/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-20",
+      "kabKota": "Kota Sukabumi",
+      "kategori": "Pangan",
+      "barang": "Biskuit",
+      "jumlahDiminta": 1320,
+      "hargaSatuan": 25000,
+      "estimasiNilai": 33000000
+    },
+    {
+      "id": "REQ-0086",
+      "noSurat": "360/084/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-23",
+      "kabKota": "Kota Tasikmalaya",
+      "kategori": "Logistik Lainnya",
+      "barang": "Genset",
+      "jumlahDiminta": 50,
+      "hargaSatuan": 12500000,
+      "estimasiNilai": 625000000
+    },
+    {
+      "id": "REQ-0087",
+      "noSurat": "360/087/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-18",
+      "kabKota": "Kota Tasikmalaya",
+      "kategori": "Pangan",
+      "barang": "Makanan Siap Saji",
+      "jumlahDiminta": 340,
+      "hargaSatuan": 45000,
+      "estimasiNilai": 15300000
+    },
+    {
+      "id": "REQ-0088",
+      "noSurat": "360/088/BPBD-KOTA/I/2026",
+      "tahunAnggaran": 2026,
+      "tanggalPermohonan": "2026-01-22",
+      "kabKota": "Kota Tasikmalaya",
+      "kategori": "Logistik Lainnya",
+      "barang": "Family Kit",
+      "jumlahDiminta": 330,
+      "hargaSatuan": 350000,
+      "estimasiNilai": 115500000
     }
   ],
   "riwayatMutasiSemua": [
@@ -713,7 +2427,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 150000000
     },
     {
       "id": "TX-0248",
@@ -728,7 +2444,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 210000000
     },
     {
       "id": "TX-0249",
@@ -743,7 +2461,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 157500000
     },
     {
       "id": "TX-0247",
@@ -758,7 +2478,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 98000000
     },
     {
       "id": "TX-0246",
@@ -773,7 +2495,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 48750000
     },
     {
       "id": "TX-0245",
@@ -788,7 +2512,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 12500000,
+      "nilaiTotal": 162500000
     },
     {
       "id": "TX-0244",
@@ -803,7 +2529,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kota Bekasi",
-      "kabKotaTujuan": "Kota Bekasi"
+      "kabKotaTujuan": "Kota Bekasi",
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 135000000
     },
     {
       "id": "TX-0243",
@@ -818,7 +2546,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 192000000
     },
     {
       "id": "TX-0241",
@@ -833,7 +2563,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 595000000
     },
     {
       "id": "TX-0242",
@@ -848,7 +2580,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 90000,
+      "nilaiTotal": 117000000
     },
     {
       "id": "TX-0240",
@@ -863,7 +2597,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kota Bogor",
-      "kabKotaTujuan": "Kota Bogor"
+      "kabKotaTujuan": "Kota Bogor",
+      "hargaSatuan": 8500000,
+      "nilaiTotal": 127500000
     },
     {
       "id": "TX-0239",
@@ -878,7 +2614,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 12500000,
+      "nilaiTotal": 275000000
     },
     {
       "id": "TX-0238",
@@ -893,7 +2631,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 86250000
     },
     {
       "id": "TX-0236",
@@ -908,7 +2648,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 26000000
     },
     {
       "id": "TX-0237",
@@ -923,7 +2665,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 194750000
     },
     {
       "id": "TX-0234",
@@ -938,7 +2682,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 28500000
     },
     {
       "id": "TX-0235",
@@ -953,7 +2699,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Subang",
-      "kabKotaTujuan": "Kabupaten Subang"
+      "kabKotaTujuan": "Kabupaten Subang",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 92250000
     },
     {
       "id": "TX-0233",
@@ -968,7 +2716,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 119250000
     },
     {
       "id": "TX-0232",
@@ -983,7 +2733,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 211500000
     },
     {
       "id": "TX-0230",
@@ -998,7 +2750,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 127500000
     },
     {
       "id": "TX-0231",
@@ -1013,7 +2767,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 90000,
+      "nilaiTotal": 90000000
     },
     {
       "id": "TX-0227",
@@ -1028,7 +2784,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 126000000
     },
     {
       "id": "TX-0228",
@@ -1043,7 +2801,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 76500000
     },
     {
       "id": "TX-0229",
@@ -1058,7 +2818,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kota Cimahi",
-      "kabKotaTujuan": "Kota Cimahi"
+      "kabKotaTujuan": "Kota Cimahi",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 5000000
     },
     {
       "id": "TX-0226",
@@ -1073,7 +2835,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 127750000
     },
     {
       "id": "TX-0224",
@@ -1088,7 +2852,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 178500000
     },
     {
       "id": "TX-0225",
@@ -1103,7 +2869,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kota Banjar",
-      "kabKotaTujuan": "Kota Banjar"
+      "kabKotaTujuan": "Kota Banjar",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 104500000
     },
     {
       "id": "TX-0223",
@@ -1118,7 +2886,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 8500000,
+      "nilaiTotal": 935000000
     },
     {
       "id": "TX-0222",
@@ -1133,7 +2903,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 140000000
     },
     {
       "id": "TX-0221",
@@ -1148,7 +2920,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 25000000
     },
     {
       "id": "TX-0220",
@@ -1163,7 +2937,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kabupaten Purwakarta",
-      "kabKotaTujuan": "Kabupaten Purwakarta"
+      "kabKotaTujuan": "Kabupaten Purwakarta",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 73125000
     },
     {
       "id": "TX-0218",
@@ -1178,7 +2954,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 52500000
     },
     {
       "id": "TX-0219",
@@ -1193,7 +2971,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 630000000
     },
     {
       "id": "TX-0216",
@@ -1208,7 +2988,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 162000000
     },
     {
       "id": "TX-0217",
@@ -1223,7 +3005,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 35000000
     },
     {
       "id": "TX-0215",
@@ -1238,7 +3022,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 57500000
     },
     {
       "id": "TX-0213",
@@ -1253,7 +3039,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 60000,
+      "nilaiTotal": 9000000
     },
     {
       "id": "TX-0214",
@@ -1268,7 +3056,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 96250000
     },
     {
       "id": "TX-0212",
@@ -1283,7 +3073,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 48750000
     },
     {
       "id": "TX-0211",
@@ -1298,7 +3090,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 228000000
     },
     {
       "id": "TX-0210",
@@ -1313,7 +3107,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kota Bandung",
-      "kabKotaTujuan": "Kota Bandung"
+      "kabKotaTujuan": "Kota Bandung",
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 67500000
     },
     {
       "id": "TX-0209",
@@ -1328,7 +3124,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 71250000
     },
     {
       "id": "TX-0208",
@@ -1343,7 +3141,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 60000,
+      "nilaiTotal": 48000000
     },
     {
       "id": "TX-0206",
@@ -1358,7 +3158,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 262500000
     },
     {
       "id": "TX-0207",
@@ -1373,7 +3175,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kabupaten Majalengka",
-      "kabKotaTujuan": "Kabupaten Majalengka"
+      "kabKotaTujuan": "Kabupaten Majalengka",
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 400000000
     },
     {
       "id": "TX-0205",
@@ -1388,7 +3192,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 29250000
     },
     {
       "id": "TX-0204",
@@ -1403,7 +3209,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kabupaten Tasikmalaya",
-      "kabKotaTujuan": "Kabupaten Tasikmalaya"
+      "kabKotaTujuan": "Kabupaten Tasikmalaya",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 54625000
     },
     {
       "id": "TX-0203",
@@ -1418,7 +3226,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kabupaten Sukabumi",
-      "kabKotaTujuan": "Kabupaten Sukabumi"
+      "kabKotaTujuan": "Kabupaten Sukabumi",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 45000000
     },
     {
       "id": "TX-0202",
@@ -1433,7 +3243,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 119250000
     },
     {
       "id": "TX-0200",
@@ -1448,7 +3260,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 472500000
     },
     {
       "id": "TX-0201",
@@ -1463,7 +3277,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 75000000
     },
     {
       "id": "TX-0199",
@@ -1478,7 +3294,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 332500000
     },
     {
       "id": "TX-0198",
@@ -1493,7 +3311,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Ciamis",
-      "kabKotaTujuan": "Kabupaten Ciamis"
+      "kabKotaTujuan": "Kabupaten Ciamis",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 22500000
     },
     {
       "id": "TX-0197",
@@ -1508,7 +3328,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 90000,
+      "nilaiTotal": 99000000
     },
     {
       "id": "TX-0196",
@@ -1523,7 +3345,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 137500000
     },
     {
       "id": "TX-0195",
@@ -1538,7 +3362,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kota Cimahi",
-      "kabKotaTujuan": "Kota Cimahi"
+      "kabKotaTujuan": "Kota Cimahi",
+      "hargaSatuan": 60000,
+      "nilaiTotal": 31500000
     },
     {
       "id": "TX-0194",
@@ -1553,7 +3379,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 139500000
     },
     {
       "id": "TX-0193",
@@ -1568,7 +3396,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kabupaten Garut",
-      "kabKotaTujuan": "Kabupaten Garut"
+      "kabKotaTujuan": "Kabupaten Garut",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 81750000
     },
     {
       "id": "TX-0192",
@@ -1583,7 +3413,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 36750000
     },
     {
       "id": "TX-0191",
@@ -1598,7 +3430,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 33750000
     },
     {
       "id": "TX-0190",
@@ -1613,7 +3447,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 472500000
     },
     {
       "id": "TX-0189",
@@ -1628,7 +3464,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kota Banjar",
-      "kabKotaTujuan": "Kota Banjar"
+      "kabKotaTujuan": "Kota Banjar",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 35000000
     },
     {
       "id": "TX-0187",
@@ -1643,7 +3481,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 448000000
     },
     {
       "id": "TX-0188",
@@ -1658,7 +3498,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kota Bogor",
-      "kabKotaTujuan": "Kota Bogor"
+      "kabKotaTujuan": "Kota Bogor",
+      "hargaSatuan": 8500000,
+      "nilaiTotal": 127500000
     },
     {
       "id": "TX-0186",
@@ -1673,7 +3515,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 27000000
     },
     {
       "id": "TX-0185",
@@ -1688,7 +3532,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 560000000
     },
     {
       "id": "TX-0184",
@@ -1703,7 +3549,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 227500000
     },
     {
       "id": "TX-0183",
@@ -1718,7 +3566,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kabupaten Pangandaran",
-      "kabKotaTujuan": "Kabupaten Pangandaran"
+      "kabKotaTujuan": "Kabupaten Pangandaran",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 33125000
     },
     {
       "id": "TX-0181",
@@ -1733,7 +3583,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 30000000
     },
     {
       "id": "TX-0182",
@@ -1748,7 +3600,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 49000000
     },
     {
       "id": "TX-0180",
@@ -1763,7 +3617,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 52000000
     },
     {
       "id": "TX-0179",
@@ -1778,7 +3634,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 42000000
     },
     {
       "id": "TX-0178",
@@ -1793,7 +3651,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kota Bogor",
-      "kabKotaTujuan": "Kota Bogor"
+      "kabKotaTujuan": "Kota Bogor",
+      "hargaSatuan": 90000,
+      "nilaiTotal": 76500000
     },
     {
       "id": "TX-0177",
@@ -1808,7 +3668,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Tasikmalaya",
-      "kabKotaTujuan": "Kabupaten Tasikmalaya"
+      "kabKotaTujuan": "Kabupaten Tasikmalaya",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 53125000
     },
     {
       "id": "TX-0176",
@@ -1823,7 +3685,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kabupaten Bekasi",
-      "kabKotaTujuan": "Kabupaten Bekasi"
+      "kabKotaTujuan": "Kabupaten Bekasi",
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 320000000
     },
     {
       "id": "TX-0175",
@@ -1838,7 +3702,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kota Depok",
-      "kabKotaTujuan": "Kota Depok"
+      "kabKotaTujuan": "Kota Depok",
+      "hargaSatuan": 60000,
+      "nilaiTotal": 10500000
     },
     {
       "id": "TX-0174",
@@ -1853,7 +3719,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 402500000
     },
     {
       "id": "TX-0173",
@@ -1868,7 +3736,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Bogor",
-      "kabKotaTujuan": "Kabupaten Bogor"
+      "kabKotaTujuan": "Kabupaten Bogor",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 105750000
     },
     {
       "id": "TX-0172",
@@ -1883,7 +3753,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 101250000
     },
     {
       "id": "TX-0171",
@@ -1898,7 +3770,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 220500000
     },
     {
       "id": "TX-0170",
@@ -1913,7 +3787,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 85750000
     },
     {
       "id": "TX-0167",
@@ -1928,7 +3804,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 608000000
     },
     {
       "id": "TX-0168",
@@ -1943,7 +3821,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 119000000
     },
     {
       "id": "TX-0169",
@@ -1958,7 +3838,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 100500000
     },
     {
       "id": "TX-0166",
@@ -1973,7 +3855,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 60000,
+      "nilaiTotal": 24000000
     },
     {
       "id": "TX-0165",
@@ -1988,7 +3872,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 90000,
+      "nilaiTotal": 162000000
     },
     {
       "id": "TX-0163",
@@ -2003,7 +3889,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 665000000
     },
     {
       "id": "TX-0164",
@@ -2018,7 +3906,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 770000000
     },
     {
       "id": "TX-0162",
@@ -2033,7 +3923,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kota Sukabumi",
-      "kabKotaTujuan": "Kota Sukabumi"
+      "kabKotaTujuan": "Kota Sukabumi",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 28125000
     },
     {
       "id": "TX-0161",
@@ -2048,7 +3940,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 60000,
+      "nilaiTotal": 18000000
     },
     {
       "id": "TX-0160",
@@ -2063,7 +3957,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kota Tasikmalaya",
-      "kabKotaTujuan": "Kota Tasikmalaya"
+      "kabKotaTujuan": "Kota Tasikmalaya",
+      "hargaSatuan": 12500000,
+      "nilaiTotal": 125000000
     },
     {
       "id": "TX-0159",
@@ -2078,7 +3974,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kabupaten Majalengka",
-      "kabKotaTujuan": "Kabupaten Majalengka"
+      "kabKotaTujuan": "Kabupaten Majalengka",
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 135000000
     },
     {
       "id": "TX-0158",
@@ -2093,7 +3991,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 106250000
     },
     {
       "id": "TX-0157",
@@ -2108,7 +4008,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 41250000
     },
     {
       "id": "TX-0154",
@@ -2123,7 +4025,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 212500000
     },
     {
       "id": "TX-0155",
@@ -2138,7 +4042,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 280000000
     },
     {
       "id": "TX-0156",
@@ -2153,7 +4059,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Cirebon",
-      "kabKotaTujuan": "Kabupaten Cirebon"
+      "kabKotaTujuan": "Kabupaten Cirebon",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 33750000
     },
     {
       "id": "TX-0153",
@@ -2168,7 +4076,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 16250000
     },
     {
       "id": "TX-0152",
@@ -2183,7 +4093,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 90000000
     },
     {
       "id": "TX-0151",
@@ -2198,7 +4110,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kabupaten Karawang",
-      "kabKotaTujuan": "Kabupaten Karawang"
+      "kabKotaTujuan": "Kabupaten Karawang",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 11250000
     },
     {
       "id": "TX-0150",
@@ -2213,7 +4127,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Majalengka",
-      "kabKotaTujuan": "Kabupaten Majalengka"
+      "kabKotaTujuan": "Kabupaten Majalengka",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 78000000
     },
     {
       "id": "TX-0148",
@@ -2228,7 +4144,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 12500000,
+      "nilaiTotal": 275000000
     },
     {
       "id": "TX-0149",
@@ -2243,7 +4161,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 157500000
     },
     {
       "id": "TX-0147",
@@ -2258,7 +4178,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 75000000
     },
     {
       "id": "TX-0146",
@@ -2273,7 +4195,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 120000000
     },
     {
       "id": "TX-0145",
@@ -2288,7 +4212,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 165000000
     },
     {
       "id": "TX-0143",
@@ -2303,7 +4229,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 127500000
     },
     {
       "id": "TX-0144",
@@ -2318,7 +4246,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 12500000,
+      "nilaiTotal": 325000000
     },
     {
       "id": "TX-0142",
@@ -2333,7 +4263,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 102000000
     },
     {
       "id": "TX-0141",
@@ -2348,7 +4280,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 47250000
     },
     {
       "id": "TX-0140",
@@ -2363,7 +4297,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kota Sukabumi",
-      "kabKotaTujuan": "Kota Sukabumi"
+      "kabKotaTujuan": "Kota Sukabumi",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 45000000
     },
     {
       "id": "TX-0139",
@@ -2378,7 +4314,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 49500000
     },
     {
       "id": "TX-0137",
@@ -2393,7 +4331,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 45000000
     },
     {
       "id": "TX-0138",
@@ -2408,7 +4348,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 43750000
     },
     {
       "id": "TX-0136",
@@ -2423,7 +4365,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 22750000
     },
     {
       "id": "TX-0135",
@@ -2438,7 +4382,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 123250000
     },
     {
       "id": "TX-0134",
@@ -2453,7 +4399,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 59500000
     },
     {
       "id": "TX-0132",
@@ -2468,7 +4416,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 60000,
+      "nilaiTotal": 51000000
     },
     {
       "id": "TX-0133",
@@ -2483,7 +4433,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kabupaten Bogor",
-      "kabKotaTujuan": "Kabupaten Bogor"
+      "kabKotaTujuan": "Kabupaten Bogor",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 52500000
     },
     {
       "id": "TX-0131",
@@ -2498,7 +4450,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 102000000
     },
     {
       "id": "TX-0130",
@@ -2513,7 +4467,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 70000000
     },
     {
       "id": "TX-0129",
@@ -2528,7 +4484,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 90000000
     },
     {
       "id": "TX-0128",
@@ -2543,7 +4501,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 66000000
     },
     {
       "id": "TX-0127",
@@ -2558,7 +4518,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 78000000
     },
     {
       "id": "TX-0126",
@@ -2573,7 +4535,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kota Depok",
-      "kabKotaTujuan": "Kota Depok"
+      "kabKotaTujuan": "Kota Depok",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 38125000
     },
     {
       "id": "TX-0123",
@@ -2588,7 +4552,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 60000,
+      "nilaiTotal": 45000000
     },
     {
       "id": "TX-0124",
@@ -2603,7 +4569,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 78750000
     },
     {
       "id": "TX-0125",
@@ -2618,7 +4586,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Cirebon",
-      "kabKotaTujuan": "Kabupaten Cirebon"
+      "kabKotaTujuan": "Kabupaten Cirebon",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 45500000
     },
     {
       "id": "TX-0122",
@@ -2633,7 +4603,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kota Banjar",
-      "kabKotaTujuan": "Kota Banjar"
+      "kabKotaTujuan": "Kota Banjar",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 39375000
     },
     {
       "id": "TX-0121",
@@ -2648,7 +4620,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 507500000
     },
     {
       "id": "TX-0120",
@@ -2663,7 +4637,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kota Cirebon",
-      "kabKotaTujuan": "Kota Cirebon"
+      "kabKotaTujuan": "Kota Cirebon",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 81000000
     },
     {
       "id": "TX-0117",
@@ -2678,7 +4654,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 42250000
     },
     {
       "id": "TX-0118",
@@ -2693,7 +4671,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 221250000
     },
     {
       "id": "TX-0119",
@@ -2708,7 +4688,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 85000000
     },
     {
       "id": "TX-0116",
@@ -2723,7 +4705,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 82500000
     },
     {
       "id": "TX-0115",
@@ -2738,7 +4722,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 8500000,
+      "nilaiTotal": 680000000
     },
     {
       "id": "TX-0114",
@@ -2753,7 +4739,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 448000000
     },
     {
       "id": "TX-0112",
@@ -2768,7 +4756,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 672000000
     },
     {
       "id": "TX-0113",
@@ -2783,7 +4773,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 165750000
     },
     {
       "id": "TX-0110",
@@ -2798,7 +4790,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 45000000
     },
     {
       "id": "TX-0111",
@@ -2813,7 +4807,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 66000000
     },
     {
       "id": "TX-0109",
@@ -2828,7 +4824,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 147000000
     },
     {
       "id": "TX-0107",
@@ -2843,7 +4841,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 770000000
     },
     {
       "id": "TX-0108",
@@ -2858,7 +4858,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 52500000
     },
     {
       "id": "TX-0106",
@@ -2873,7 +4875,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 42250000
     },
     {
       "id": "TX-0104",
@@ -2888,7 +4892,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 560000000
     },
     {
       "id": "TX-0105",
@@ -2903,7 +4909,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kota Depok",
-      "kabKotaTujuan": "Kota Depok"
+      "kabKotaTujuan": "Kota Depok",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 262500000
     },
     {
       "id": "TX-0103",
@@ -2918,7 +4926,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 275000000
     },
     {
       "id": "TX-0101",
@@ -2933,7 +4943,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 90000,
+      "nilaiTotal": 27000000
     },
     {
       "id": "TX-0102",
@@ -2948,7 +4960,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 19500000
     },
     {
       "id": "TX-0100",
@@ -2963,7 +4977,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 212250000
     },
     {
       "id": "TX-0099",
@@ -2978,7 +4994,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 180500000
     },
     {
       "id": "TX-0097",
@@ -2993,7 +5011,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 490000000
     },
     {
       "id": "TX-0098",
@@ -3008,7 +5028,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 108750000
     },
     {
       "id": "TX-0096",
@@ -3023,7 +5045,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 157500000
     },
     {
       "id": "TX-0095",
@@ -3038,7 +5062,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 68250000
     },
     {
       "id": "TX-0094",
@@ -3053,7 +5079,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 45500000
     },
     {
       "id": "TX-0093",
@@ -3068,7 +5096,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 176250000
     },
     {
       "id": "TX-0092",
@@ -3083,7 +5113,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 129000000
     },
     {
       "id": "TX-0090",
@@ -3098,7 +5130,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 175000000
     },
     {
       "id": "TX-0091",
@@ -3113,7 +5147,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 180000000
     },
     {
       "id": "TX-0088",
@@ -3128,7 +5164,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 37500000
     },
     {
       "id": "TX-0089",
@@ -3143,7 +5181,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 608000000
     },
     {
       "id": "TX-0087",
@@ -3158,7 +5198,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 112500000
     },
     {
       "id": "TX-0086",
@@ -3173,7 +5215,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 12500000,
+      "nilaiTotal": 300000000
     },
     {
       "id": "TX-0085",
@@ -3188,7 +5232,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Indramayu",
-      "kabKotaTujuan": "Kabupaten Indramayu"
+      "kabKotaTujuan": "Kabupaten Indramayu",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 76500000
     },
     {
       "id": "TX-0084",
@@ -3203,7 +5249,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 177000000
     },
     {
       "id": "TX-0082",
@@ -3218,7 +5266,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 114750000
     },
     {
       "id": "TX-0083",
@@ -3233,7 +5283,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 155250000
     },
     {
       "id": "TX-0081",
@@ -3248,7 +5300,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kota Cimahi",
-      "kabKotaTujuan": "Kota Cimahi"
+      "kabKotaTujuan": "Kota Cimahi",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 122500000
     },
     {
       "id": "TX-0080",
@@ -3263,7 +5317,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 121500000
     },
     {
       "id": "TX-0079",
@@ -3278,7 +5334,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kota Bandung",
-      "kabKotaTujuan": "Kota Bandung"
+      "kabKotaTujuan": "Kota Bandung",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 27625000
     },
     {
       "id": "TX-0078",
@@ -3293,7 +5351,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 185250000
     },
     {
       "id": "TX-0076",
@@ -3308,7 +5368,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 118750000
     },
     {
       "id": "TX-0077",
@@ -3323,7 +5385,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 210000000
     },
     {
       "id": "TX-0075",
@@ -3338,7 +5402,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 117000000
     },
     {
       "id": "TX-0074",
@@ -3353,7 +5419,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Sukabumi",
-      "kabKotaTujuan": "Kabupaten Sukabumi"
+      "kabKotaTujuan": "Kabupaten Sukabumi",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 82125000
     },
     {
       "id": "TX-0073",
@@ -3368,7 +5436,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 8500000,
+      "nilaiTotal": 1190000000
     },
     {
       "id": "TX-0072",
@@ -3383,7 +5453,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 60000,
+      "nilaiTotal": 51000000
     },
     {
       "id": "TX-0071",
@@ -3398,7 +5470,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 320000000
     },
     {
       "id": "TX-0070",
@@ -3413,7 +5487,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 131750000
     },
     {
       "id": "TX-0069",
@@ -3428,7 +5504,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 191250000
     },
     {
       "id": "TX-0068",
@@ -3443,7 +5521,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 132000000
     },
     {
       "id": "TX-0066",
@@ -3458,7 +5538,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 90000000
     },
     {
       "id": "TX-0067",
@@ -3473,7 +5555,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 208500000
     },
     {
       "id": "TX-0063",
@@ -3488,7 +5572,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kabupaten Bekasi",
-      "kabKotaTujuan": "Kabupaten Bekasi"
+      "kabKotaTujuan": "Kabupaten Bekasi",
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 31500000
     },
     {
       "id": "TX-0064",
@@ -3503,7 +5589,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Karawang",
-      "kabKotaTujuan": "Kabupaten Karawang"
+      "kabKotaTujuan": "Kabupaten Karawang",
+      "hargaSatuan": 8500000,
+      "nilaiTotal": 680000000
     },
     {
       "id": "TX-0065",
@@ -3518,7 +5606,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kabupaten Subang",
-      "kabKotaTujuan": "Kabupaten Subang"
+      "kabKotaTujuan": "Kabupaten Subang",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 45000000
     },
     {
       "id": "TX-0062",
@@ -3533,7 +5623,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 46750000
     },
     {
       "id": "TX-0061",
@@ -3548,7 +5640,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kabupaten Karawang",
-      "kabKotaTujuan": "Kabupaten Karawang"
+      "kabKotaTujuan": "Kabupaten Karawang",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 89250000
     },
     {
       "id": "TX-0060",
@@ -3563,7 +5657,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 211500000
     },
     {
       "id": "TX-0058",
@@ -3578,7 +5674,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 152000000
     },
     {
       "id": "TX-0059",
@@ -3593,7 +5691,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 60000000
     },
     {
       "id": "TX-0057",
@@ -3608,7 +5708,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kabupaten Indramayu",
-      "kabKotaTujuan": "Kabupaten Indramayu"
+      "kabKotaTujuan": "Kabupaten Indramayu",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 26875000
     },
     {
       "id": "TX-0056",
@@ -3623,7 +5725,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 8500000,
+      "nilaiTotal": 510000000
     },
     {
       "id": "TX-0053",
@@ -3638,7 +5742,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 52500000
     },
     {
       "id": "TX-0054",
@@ -3653,7 +5759,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 117250000
     },
     {
       "id": "TX-0055",
@@ -3668,7 +5776,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kabupaten Subang",
-      "kabKotaTujuan": "Kabupaten Subang"
+      "kabKotaTujuan": "Kabupaten Subang",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 22500000
     },
     {
       "id": "TX-0052",
@@ -3683,7 +5793,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 420000000
     },
     {
       "id": "TX-0051",
@@ -3698,7 +5810,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kabupaten Sukabumi",
-      "kabKotaTujuan": "Kabupaten Sukabumi"
+      "kabKotaTujuan": "Kabupaten Sukabumi",
+      "hargaSatuan": 3200000,
+      "nilaiTotal": 224000000
     },
     {
       "id": "TX-0050",
@@ -3713,7 +5827,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 31500000
     },
     {
       "id": "TX-0049",
@@ -3728,7 +5844,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kabupaten Bekasi",
-      "kabKotaTujuan": "Kabupaten Bekasi"
+      "kabKotaTujuan": "Kabupaten Bekasi",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 50250000
     },
     {
       "id": "TX-0048",
@@ -3743,7 +5861,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 60000,
+      "nilaiTotal": 48000000
     },
     {
       "id": "TX-0047",
@@ -3758,7 +5878,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 15000000
     },
     {
       "id": "TX-0046",
@@ -3773,7 +5895,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 23750000
     },
     {
       "id": "TX-0045",
@@ -3788,7 +5912,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 72250000
     },
     {
       "id": "TX-0042",
@@ -3803,7 +5929,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 125000000
     },
     {
       "id": "TX-0043",
@@ -3818,7 +5946,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 58750000
     },
     {
       "id": "TX-0044",
@@ -3833,7 +5963,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 97500000
     },
     {
       "id": "TX-0041",
@@ -3848,7 +5980,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 52500000
     },
     {
       "id": "TX-0040",
@@ -3863,7 +5997,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 18750000
     },
     {
       "id": "TX-0037",
@@ -3878,7 +6014,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 12500000,
+      "nilaiTotal": 62500000
     },
     {
       "id": "TX-0038",
@@ -3893,7 +6031,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 42000000
     },
     {
       "id": "TX-0039",
@@ -3908,7 +6048,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Tujuan: Kota Bogor",
-      "kabKotaTujuan": "Kota Bogor"
+      "kabKotaTujuan": "Kota Bogor",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 93750000
     },
     {
       "id": "TX-0036",
@@ -3923,7 +6065,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 55250000
     },
     {
       "id": "TX-0035",
@@ -3938,7 +6082,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 20000000
     },
     {
       "id": "TX-0034",
@@ -3953,7 +6099,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Garut",
-      "kabKotaTujuan": "Kabupaten Garut"
+      "kabKotaTujuan": "Kabupaten Garut",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 26250000
     },
     {
       "id": "TX-0033",
@@ -3968,7 +6116,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Tujuan: Kabupaten Majalengka",
-      "kabKotaTujuan": "Kabupaten Majalengka"
+      "kabKotaTujuan": "Kabupaten Majalengka",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 45000000
     },
     {
       "id": "TX-0032",
@@ -3983,7 +6133,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 4500000,
+      "nilaiTotal": 81000000
     },
     {
       "id": "TX-0031",
@@ -3998,7 +6150,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 31500000
     },
     {
       "id": "TX-0030",
@@ -4013,7 +6167,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 65000,
+      "nilaiTotal": 39000000
     },
     {
       "id": "TX-0029",
@@ -4028,7 +6184,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 25000,
+      "nilaiTotal": 27500000
     },
     {
       "id": "TX-0028",
@@ -4043,7 +6201,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 250000,
+      "nilaiTotal": 37500000
     },
     {
       "id": "TX-0027",
@@ -4058,7 +6218,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 114000000
     },
     {
       "id": "TX-0025",
@@ -4073,7 +6235,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 28500000
     },
     {
       "id": "TX-0026",
@@ -4088,7 +6252,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 31500000
     },
     {
       "id": "TX-0024",
@@ -4103,7 +6269,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Tujuan: Kabupaten Bandung Barat",
-      "kabKotaTujuan": "Kabupaten Bandung Barat"
+      "kabKotaTujuan": "Kabupaten Bandung Barat",
+      "hargaSatuan": 35000,
+      "nilaiTotal": 10500000
     },
     {
       "id": "TX-0023",
@@ -4118,7 +6286,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 630000000
     },
     {
       "id": "TX-0022",
@@ -4133,7 +6303,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 30000000
     },
     {
       "id": "TX-0021",
@@ -4148,7 +6320,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 45000,
+      "nilaiTotal": 130500000
     },
     {
       "id": "TX-0020",
@@ -4163,7 +6337,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 157500000
     },
     {
       "id": "TX-0018",
@@ -4178,7 +6354,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 114750000
     },
     {
       "id": "TX-0019",
@@ -4193,7 +6371,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 15000,
+      "nilaiTotal": 108000000
     },
     {
       "id": "TX-0017",
@@ -4208,7 +6388,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 85000,
+      "nilaiTotal": 29750000
     },
     {
       "id": "TX-0016",
@@ -4223,7 +6405,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 38000000
     },
     {
       "id": "TX-0015",
@@ -4238,7 +6422,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 90000,
+      "nilaiTotal": 166500000
     },
     {
       "id": "TX-0014",
@@ -4253,7 +6439,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 90000,
+      "nilaiTotal": 63000000
     },
     {
       "id": "TX-0013",
@@ -4268,7 +6456,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 150000,
+      "nilaiTotal": 67500000
     },
     {
       "id": "TX-0011",
@@ -4283,7 +6473,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 38000000
     },
     {
       "id": "TX-0012",
@@ -4298,7 +6490,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 30000,
+      "nilaiTotal": 40500000
     },
     {
       "id": "TX-0010",
@@ -4313,7 +6507,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 90000,
+      "nilaiTotal": 175500000
     },
     {
       "id": "TX-0009",
@@ -4328,7 +6524,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 8500000,
+      "nilaiTotal": 935000000
     },
     {
       "id": "TX-0008",
@@ -4343,7 +6541,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 95000,
+      "nilaiTotal": 52250000
     },
     {
       "id": "TX-0007",
@@ -4358,7 +6558,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 525000000
     },
     {
       "id": "TX-0006",
@@ -4373,7 +6575,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 350000,
+      "nilaiTotal": 367500000
     },
     {
       "id": "TX-0005",
@@ -4388,7 +6592,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "CSR",
       "asalTujuan": "Sumber: CSR",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 75000,
+      "nilaiTotal": 120000000
     },
     {
       "id": "TX-0004",
@@ -4403,7 +6609,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBD",
       "asalTujuan": "Sumber: APBD",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 35000000,
+      "nilaiTotal": 280000000
     },
     {
       "id": "TX-0003",
@@ -4418,7 +6626,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 12500000,
+      "nilaiTotal": 250000000
     },
     {
       "id": "TX-0002",
@@ -4433,7 +6643,9 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 96000000
     },
     {
       "id": "TX-0001",
@@ -4448,7 +6660,13 @@ const ELUNA_OPERATOR_DATA = {
       "satuan": "Unit/Paket",
       "sumberDana": "APBN",
       "asalTujuan": "Sumber: APBN",
-      "kabKotaTujuan": "-"
+      "kabKotaTujuan": "-",
+      "hargaSatuan": 120000,
+      "nilaiTotal": 72000000
     }
   ]
 };
+
+if (typeof window !== 'undefined') {
+  window.ELUNA_OPERATOR_DATA = ELUNA_OPERATOR_DATA;
+}
