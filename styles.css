@@ -1223,12 +1223,24 @@ dialog::backdrop {
   background-color: #FFFFFF;
 }
 
-/* Grid Kartu Metrik KALAK (6 Metrik Finansial Makro) */
+/* Grid Kartu Metrik KALAK (6 Metrik Finansial Makro - Layout 2 Baris / 3x2) */
 .kalak-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.15rem;
   margin-bottom: 1.75rem;
+}
+
+@media (max-width: 1024px) {
+  .kalak-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .kalak-cards-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Kartu Finansial KALAK */
@@ -1431,6 +1443,66 @@ dialog::backdrop {
   font-weight: 700;
   padding: 0.2rem 0.6rem;
   border-radius: 4px;
+}
+
+/* Switch Toggle Button Mode Grafik Kategori Kabid */
+.btn-chart-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px solid #CBD5E1;
+  background-color: #F8FAFC;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-chart-mode:hover {
+  background-color: #E2E8F0;
+  color: #1E293B;
+}
+
+.btn-chart-mode.active {
+  background-color: #0E63AA;
+  border-color: #0E63AA;
+  color: #FFFFFF;
+}
+
+/* Link Daerah & Tombol Aksi di Tabel Kabid */
+.kabid-daerah-link {
+  font-weight: 700;
+  color: #0E63AA;
+  cursor: pointer;
+  transition: color 0.15s ease, text-decoration 0.15s ease;
+}
+
+.kabid-daerah-link:hover {
+  color: #0369A1;
+  text-decoration: underline;
+}
+
+.btn-detail-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+  border: 1px solid #0E63AA;
+  background-color: #F0F9FF;
+  color: #0E63AA;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-detail-sm:hover {
+  background-color: #0E63AA;
+  color: #FFFFFF;
 }
 
 

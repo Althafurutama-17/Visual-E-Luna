@@ -1567,9 +1567,10 @@ function handleModalSearch(val) {
 
 let kabidSelectedTahun = "ALL";
 let kabidSelectedKategori = "ALL";
-let kabidSelectedStatus = "ALL"; // "ALL" | "kritis" | "kurang" | "aman"
+let kabidSelectedStatus = "ALL"; // "ALL" | "aman" | "kurang"
 let kabidSelectedWilayah = null;
 let kabidSearchQuery = "";
+let kabidCategoryChartMode = "compare"; // "compare" | "gap"
 let chartKabidPemenuhanInstance = null;
 let chartKabidGapKategoriInstance = null;
 
@@ -1586,9 +1587,8 @@ function filterKabidTableStatus(statusKey) {
   kabidSelectedStatus = statusKey;
   const pillIds = {
     "ALL": "btn-status-all",
-    "kritis": "btn-status-kritis",
-    "kurang": "btn-status-kurang",
-    "aman": "btn-status-aman"
+    "aman": "btn-status-aman",
+    "kurang": "btn-status-kurang"
   };
   Object.values(pillIds).forEach(id => {
     const el = document.getElementById(id);
@@ -1614,6 +1614,27 @@ function resetKabidTableFilter() {
   filterKabidTableStatus("ALL");
   renderKabidView();
   showToast("Filter tabel kesenjangan daerah direset");
+}
+
+function switchKabidChartKategoriMode(mode) {
+  kabidCategoryChartMode = mode;
+  const btnCompare = document.getElementById("btn-chart-mode-compare");
+  const btnGap = document.getElementById("btn-chart-mode-gap");
+  if (btnCompare) btnCompare.classList.toggle("active", mode === "compare");
+  if (btnGap) btnGap.classList.toggle("active", mode === "gap");
+
+  const titleEl = document.getElementById("title-chart-kategori");
+  const subEl = document.getElementById("subtitle-chart-kategori");
+  if (mode === "compare") {
+    if (titleEl) titleEl.textContent = "Perbandingan Permintaan vs Realisasi per Kategori";
+    if (subEl) subEl.textContent = "Analisis perbandingan kuantitas permohonan vs realisasi penyaluran";
+  } else {
+    if (titleEl) titleEl.textContent = "Grafik Kesenjangan (Gap) per Kategori Logistik";
+    if (subEl) subEl.textContent = "Kuantitas defisit cadangan logistik yang belum terpenuhi";
+  }
+
+  const { filteredReq, filteredDist } = computeKabidDataset();
+  renderKabidKategoriChart(filteredReq, filteredDist);
 }
 
 // Komputasi Dataset Kabid (Kuantitas Permohonan vs Realisasi Distribusi)
@@ -1646,7 +1667,7 @@ function computeKabidDataset() {
       realisasi: 0,
       gap: 0,
       capaian: 0,
-      status: "kritis",
+      status: "kurang",
       items: []
     };
   });
@@ -1660,7 +1681,7 @@ function computeKabidDataset() {
         realisasi: 0,
         gap: 0,
         capaian: 0,
-        status: "kritis",
+        status: "kurang",
         items: []
       };
     }
@@ -1672,7 +1693,7 @@ function computeKabidDataset() {
       realisasi: 0,
       gap: r.jumlahDiminta,
       capaian: 0,
-      status: "kritis",
+      status: "kurang",
       noSurat: r.noSurat
     });
   });
@@ -1700,20 +1721,16 @@ function computeKabidDataset() {
     }
   });
 
-  // Kalkulasi gap, capaian persentase, dan klasifikasi status
+  // Kalkulasi gap, capaian persentase, dan klasifikasi status (Aman >= 90%, Kurang < 90%)
   Object.values(daerahMap).forEach(d => {
     d.gap = Math.max(0, d.minta - d.realisasi);
     d.capaian = d.minta > 0 ? (d.realisasi / d.minta) * 100 : (d.realisasi > 0 ? 100 : 0);
-    if (d.capaian >= 80) d.status = "aman";
-    else if (d.capaian >= 50) d.status = "kurang";
-    else d.status = "kritis";
+    d.status = d.capaian >= 90 ? "aman" : "kurang";
 
     d.items.forEach(it => {
       it.gap = Math.max(0, it.diminta - it.realisasi);
       it.capaian = it.diminta > 0 ? (it.realisasi / it.diminta) * 100 : (it.realisasi > 0 ? 100 : 0);
-      if (it.capaian >= 80) it.status = "aman";
-      else if (it.capaian >= 50) it.status = "kurang";
-      else it.status = "kritis";
+      it.status = it.capaian >= 90 ? "aman" : "kurang";
     });
   });
 
@@ -1735,9 +1752,8 @@ function renderKabidView() {
   const rasioPemenuhan = totalMinta > 0 ? ((totalAlokasi / totalMinta) * 100).toFixed(1) : "0.0";
   const gapPercent = totalMinta > 0 ? ((totalGap / totalMinta) * 100).toFixed(1) : "0.0";
 
-  const countKritis = daerahMap.filter(d => d.status === "kritis").length;
-  const countKurang = daerahMap.filter(d => d.status === "kurang").length;
   const countAman = daerahMap.filter(d => d.status === "aman").length;
+  const countKurang = daerahMap.filter(d => d.status === "kurang").length;
 
   const uniqueSurat = new Set(filteredReq.map(r => r.noSurat)).size;
 
@@ -1760,26 +1776,24 @@ function renderKabidView() {
   const elGapPct = document.getElementById("kpi-kabid-gap-percent");
   if (elGapPct) elGapPct.textContent = `Sisa Kebutuhan: ${gapPercent}%`;
 
-  const elKritis = document.getElementById("kpi-kabid-wilayah-kritis");
-  if (elKritis) elKritis.textContent = `${countKritis} Daerah`;
+  const elKurang = document.getElementById("kpi-kabid-wilayah-kritis");
+  if (elKurang) elKurang.textContent = `${countKurang} Daerah`;
 
   const elWilSub = document.getElementById("kpi-kabid-wilayah-sub");
-  if (elWilSub) elWilSub.textContent = `Prioritas Alokasi (${countKurang} Kurang, ${countAman} Aman)`;
+  if (elWilSub) elWilSub.textContent = `Prioritas Pemenuhan (${countAman} Aman, ${countKurang} Kurang)`;
 
   // Perbarui label tombol status
   const bAll = document.getElementById("btn-status-all");
   if (bAll) bAll.textContent = `Semua (${daerahMap.length})`;
-  const bKritis = document.getElementById("btn-status-kritis");
-  if (bKritis) bKritis.textContent = `🔴 Kritis (${countKritis})`;
-  const bKurang = document.getElementById("btn-status-kurang");
-  if (bKurang) bKurang.textContent = `🟡 Kurang (${countKurang})`;
   const bAman = document.getElementById("btn-status-aman");
   if (bAman) bAman.textContent = `🟢 Aman (${countAman})`;
+  const bKurang = document.getElementById("btn-status-kurang");
+  if (bKurang) bKurang.textContent = `🟡 Kurang (${countKurang})`;
 
   // 3. Render 2 Grafik Chart.js
   renderKabidCharts(daerahMap, filteredReq, filteredDist);
 
-  // 4. Render Tabel Drill-down
+  // 4. Render Tabel 27 Daerah
   renderKabidTable();
 
   if (window.lucide) {
@@ -1800,11 +1814,7 @@ function renderKabidCharts(daerahList, filteredReq, filteredDist) {
     const sortedDaerah = [...daerahList].sort((a, b) => b.capaian - a.capaian);
     const labels = sortedDaerah.map(d => d.daerah.replace("Kabupaten ", "Kab. "));
     const dataValues = sortedDaerah.map(d => parseFloat(d.capaian.toFixed(1)));
-    const bgColors = sortedDaerah.map(d => {
-      if (d.status === "aman") return "#16A34A";
-      if (d.status === "kurang") return "#D97706";
-      return "#DC2626";
-    });
+    const bgColors = sortedDaerah.map(d => (d.status === "aman" ? "#16A34A" : "#D97706"));
 
     const ctx1 = canvas1.getContext("2d");
     chartKabidPemenuhanInstance = new Chart(ctx1, {
@@ -1858,199 +1868,306 @@ function renderKabidCharts(daerahList, filteredReq, filteredDist) {
             grid: { display: false }
           }
         },
-        onClick: (evt, elements) => {
-          if (elements && elements.length > 0) {
-            const idx = elements[0].index;
-            const clickedDaerah = sortedDaerah[idx].daerah;
-            kabidSelectedWilayah = (kabidSelectedWilayah === clickedDaerah) ? null : clickedDaerah;
-            renderKabidTable();
-            showToast(kabidSelectedWilayah ? `Menyaring tabel: ${clickedDaerah}` : "Menampilkan seluruh wilayah");
-            const tbl = document.getElementById("table-kabid-drilldown");
-            if (tbl) tbl.scrollIntoView({ behavior: "smooth", block: "nearest" });
-          }
-        }
-      }
-    });
-  }
-
-  // --- GRAFIK 2: GAP PER KATEGORI BARANG (GROUPED BAR) ---
-  const canvas2 = document.getElementById("chartKabidGapKategori");
-  if (canvas2) {
-    if (chartKabidGapKategoriInstance) {
-      chartKabidGapKategoriInstance.destroy();
-    }
-
-    const categories = ["Sandang", "Pangan", "Papan", "Logistik Lainnya"];
-    const reqPerKat = categories.map(k => {
-      return filteredReq.filter(r => r.kategori === k).reduce((acc, r) => acc + r.jumlahDiminta, 0);
-    });
-    const distPerKat = categories.map(k => {
-      return filteredDist.filter(d => d.kategori === k).reduce((acc, d) => acc + d.jumlah, 0);
-    });
-    const gapPerKat = categories.map((k, i) => Math.max(0, reqPerKat[i] - distPerKat[i]));
-
-    const ctx2 = canvas2.getContext("2d");
-    chartKabidGapKategoriInstance = new Chart(ctx2, {
-      type: "bar",
-      data: {
-        labels: categories,
-        datasets: [
-          {
-            label: "Permohonan (Unit)",
-            data: reqPerKat,
-            backgroundColor: "#3B82F6",
-            borderRadius: 4
-          },
-          {
-            label: "Realisasi Penyaluran (Unit)",
-            data: distPerKat,
-            backgroundColor: "#10B981",
-            borderRadius: 4
-          },
-          {
-            label: "Kesenjangan / Gap (Unit)",
-            data: gapPerKat,
-            backgroundColor: "#F97316",
-            borderRadius: 4
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: "top",
-            labels: {
-              boxWidth: 12,
-              font: { size: 11, weight: "600" }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: context => `${context.dataset.label}: ${context.parsed.y.toLocaleString('id-ID')} Unit`
-            }
+        onHover: (evt, elements, chart) => {
+          // Pointer kursor aktif saat berada di area teks/label nama daerah di sebelah kiri chartArea
+          if (evt.x < chart.chartArea.left && evt.y >= chart.chartArea.top && evt.y <= chart.chartArea.bottom) {
+            chart.canvas.style.cursor = "pointer";
+          } else {
+            chart.canvas.style.cursor = "default";
           }
         },
-        scales: {
-          x: { grid: { display: false } },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: val => val.toLocaleString('id-ID'),
-              font: { size: 10 }
-            },
-            grid: { color: "#F1F5F9" }
+        onClick: (evt, elements, chart) => {
+          // Point 8: Hanya klik pada tulisan/label nama Kab/Kota (area sumbu Y) yang memicu pop-up rincian
+          if (evt.x < chart.chartArea.left && evt.y >= chart.chartArea.top && evt.y <= chart.chartArea.bottom) {
+            const yScale = chart.scales.y;
+            const tickCount = yScale.ticks.length;
+            let closestIdx = -1;
+            let minDiff = Infinity;
+            for (let i = 0; i < tickCount; i++) {
+              const pixel = yScale.getPixelForTick(i);
+              const diff = Math.abs(pixel - evt.y);
+              if (diff < minDiff) {
+                minDiff = diff;
+                closestIdx = i;
+              }
+            }
+            if (closestIdx >= 0 && closestIdx < sortedDaerah.length) {
+              const clickedDaerah = sortedDaerah[closestIdx].daerah;
+              openModalKabidRincian(clickedDaerah);
+            }
           }
         }
       }
     });
   }
+
+  // --- GRAFIK 2: PERBANDINGAN PER KATEGORI (DENGAN MODE SWITCH TOGGLE) ---
+  renderKabidKategoriChart(filteredReq, filteredDist);
 }
 
-// Render Tabel Drill-Down Kabid
+// Render Grafik Kategori Kabid (Mendukung Switch 'compare' vs 'gap')
+function renderKabidKategoriChart(filteredReq, filteredDist) {
+  const canvas2 = document.getElementById("chartKabidGapKategori");
+  if (!canvas2) return;
+
+  if (chartKabidGapKategoriInstance) {
+    chartKabidGapKategoriInstance.destroy();
+  }
+
+  const categories = ["Sandang", "Pangan", "Papan", "Logistik Lainnya"];
+  const reqPerKat = categories.map(k => {
+    return filteredReq.filter(r => r.kategori === k).reduce((acc, r) => acc + r.jumlahDiminta, 0);
+  });
+  const distPerKat = categories.map(k => {
+    return filteredDist.filter(d => d.kategori === k).reduce((acc, d) => acc + d.jumlah, 0);
+  });
+  const gapPerKat = categories.map((k, i) => Math.max(0, reqPerKat[i] - distPerKat[i]));
+
+  let datasets = [];
+  if (kabidCategoryChartMode === "compare") {
+    // Mode 1 (Normal): Permintaan vs Realisasi
+    datasets = [
+      {
+        label: "Permohonan (Unit)",
+        data: reqPerKat,
+        backgroundColor: "#3B82F6",
+        borderRadius: 4
+      },
+      {
+        label: "Realisasi Penyaluran (Unit)",
+        data: distPerKat,
+        backgroundColor: "#10B981",
+        borderRadius: 4
+      }
+    ];
+  } else {
+    // Mode 2: Pure Grafik Kesenjangan (Gap)
+    datasets = [
+      {
+        label: "Kesenjangan / Gap (Unit)",
+        data: gapPerKat,
+        backgroundColor: "#F97316",
+        borderRadius: 4
+      }
+    ];
+  }
+
+  const ctx2 = canvas2.getContext("2d");
+  chartKabidGapKategoriInstance = new Chart(ctx2, {
+    type: "bar",
+    data: {
+      labels: categories,
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "top",
+          labels: {
+            boxWidth: 12,
+            font: { size: 11, weight: "600" }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: context => `${context.dataset.label}: ${context.parsed.y.toLocaleString('id-ID')} Unit`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: val => val.toLocaleString('id-ID'),
+            font: { size: 10 }
+          },
+          grid: { color: "#F1F5F9" }
+        }
+      }
+    }
+  });
+}
+
+// Render Tabel Utama Kabid (Tepat 27 Baris Daerah se-Jawa Barat)
 function renderKabidTable() {
   const { daerahMap } = computeKabidDataset();
   const tbody = document.getElementById("tbody-kabid-drilldown");
   const counterEl = document.getElementById("kabid-table-counter");
   if (!tbody) return;
 
-  let flatRows = [];
-  daerahMap.forEach(d => {
-    if (kabidSelectedWilayah && d.daerah !== kabidSelectedWilayah) return;
-    if (kabidSelectedStatus !== "ALL" && d.status !== kabidSelectedStatus) return;
+  // Urutkan daerah berdasarkan capaian tertinggi ke terendah (7 Aman di atas, 20 Kurang di bawah)
+  let sortedDaerah = [...daerahMap].sort((a, b) => b.capaian - a.capaian);
 
-    d.items.forEach(it => {
-      if (kabidSearchQuery) {
-        const matchSearch = d.daerah.toLowerCase().includes(kabidSearchQuery) ||
-                            it.barang.toLowerCase().includes(kabidSearchQuery) ||
-                            it.kategori.toLowerCase().includes(kabidSearchQuery);
-        if (!matchSearch) return;
-      }
-
-      flatRows.push({
-        daerah: d.daerah,
-        daerahStatus: d.status,
-        barang: it.barang,
-        kategori: it.kategori,
-        diminta: it.diminta,
-        realisasi: it.realisasi,
-        gap: it.gap,
-        capaian: it.capaian,
-        status: it.status,
-        noSurat: it.noSurat
-      });
-    });
+  // Filter pencarian dan status
+  let filteredDaerah = sortedDaerah.filter(d => {
+    if (kabidSelectedStatus !== "ALL" && d.status !== kabidSelectedStatus) return false;
+    if (kabidSearchQuery) {
+      return d.daerah.toLowerCase().includes(kabidSearchQuery);
+    }
+    return true;
   });
 
-  if (flatRows.length === 0) {
+  if (filteredDaerah.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="10" style="text-align: center; padding: 2.5rem; color: #64748B;">
-          <p style="font-weight: 600;">Tidak ada data evaluasi penguatan yang sesuai dengan kriteria filter saat ini.</p>
+        <td colspan="8" style="text-align: center; padding: 2.5rem; color: #64748B;">
+          <p style="font-weight: 600;">Tidak ada kabupaten / kota yang sesuai dengan kriteria filter saat ini.</p>
           <button class="status-pill-btn" onclick="resetKabidTableFilter()" style="margin-top: 0.75rem;">Reset Filter</button>
         </td>
       </tr>
     `;
-    if (counterEl) counterEl.textContent = "Menampilkan 0 entri";
+    if (counterEl) counterEl.textContent = "Menampilkan 0 kabupaten / kota";
     if (window.lucide) lucide.createIcons();
     return;
   }
 
-  const katColors = {
-    "Pangan": { bg: "#EFF6FF", text: "#1D4ED8", border: "#BFDBFE" },
-    "Sandang": { bg: "#F5F3FF", text: "#6D28D9", border: "#DDD6FE" },
-    "Papan": { bg: "#FFF7ED", text: "#C2410C", border: "#FED7AA" },
-    "Logistik Lainnya": { bg: "#ECFDF5", text: "#047857", border: "#A7F3D0" }
-  };
-
-  tbody.innerHTML = flatRows.map((r, idx) => {
-    const kColor = katColors[r.kategori] || { bg: "#F1F5F9", text: "#334155", border: "#CBD5E1" };
-    
-    let badgeHtml = "";
-    let recoHtml = "";
-    if (r.status === "aman") {
-      badgeHtml = `<span class="badge-status-pemenuhan aman">Aman (${r.capaian.toFixed(0)}%)</span>`;
-      recoHtml = `<span style="font-size: 0.775rem; color: #16A34A; font-weight: 600;">Buffer stock daerah mencukupi</span>`;
-    } else if (r.status === "kurang") {
-      badgeHtml = `<span class="badge-status-pemenuhan kurang">Kurang (${r.capaian.toFixed(0)}%)</span>`;
-      recoHtml = `<span style="font-size: 0.775rem; color: #D97706; font-weight: 600;">Jadwalkan alokasi termin II</span>`;
-    } else {
-      badgeHtml = `<span class="badge-status-pemenuhan kritis">Kritis (${r.capaian.toFixed(0)}%)</span>`;
-      recoHtml = `<span style="font-size: 0.775rem; color: #DC2626; font-weight: 700;">Atensi Khusus: Prioritas penyaluran</span>`;
-    }
+  tbody.innerHTML = filteredDaerah.map((d, idx) => {
+    const isAman = d.status === "aman";
+    const badgeHtml = isAman
+      ? `<span class="badge-status-pemenuhan aman">🟢 Aman (≥90%)</span>`
+      : `<span class="badge-status-pemenuhan kurang">🟡 Kurang (&lt;90%)</span>`;
 
     return `
       <tr>
         <td style="text-align: center; font-weight: 600; color: #64748B;">${idx + 1}</td>
-        <td style="font-weight: 700; color: #1E293B;">
-          ${r.daerah}
-          ${kabidSelectedWilayah === r.daerah ? `<span style="font-size: 0.7rem; color: #0E63AA; background: #E0F2FE; padding: 0.1rem 0.35rem; border-radius: 3px; margin-left: 0.3rem;">Terfilter</span>` : ""}
-        </td>
         <td>
-          <span class="badge-kat-pill" style="background-color: ${kColor.bg}; color: ${kColor.text}; border: 1px solid ${kColor.border};">
-            ${r.kategori}
-          </span>
+          <span class="kabid-daerah-link" onclick="openModalKabidRincian('${d.daerah}')" title="Klik untuk melihat rincian barang">${d.daerah}</span>
         </td>
-        <td style="font-weight: 600;">${r.barang}</td>
-        <td class="num-cell">${r.diminta.toLocaleString('id-ID')}</td>
-        <td class="num-cell positive">${r.realisasi.toLocaleString('id-ID')}</td>
-        <td class="num-cell ${r.gap > 0 ? 'negative' : ''}">${r.gap.toLocaleString('id-ID')}</td>
-        <td style="text-align: center; font-weight: 700; color: ${r.capaian >= 80 ? '#16A34A' : (r.capaian >= 50 ? '#D97706' : '#DC2626')};">
-          ${r.capaian.toFixed(1)}%
+        <td class="num-cell" style="font-weight: 700;">${d.minta.toLocaleString('id-ID')}</td>
+        <td class="num-cell positive" style="font-weight: 700;">${d.realisasi.toLocaleString('id-ID')}</td>
+        <td class="num-cell ${d.gap > 0 ? 'negative' : ''}" style="font-weight: 700;">${d.gap.toLocaleString('id-ID')}</td>
+        <td style="text-align: center; font-weight: 800; color: ${isAman ? '#16A34A' : '#D97706'};">
+          ${d.capaian.toFixed(1)}%
         </td>
         <td style="text-align: center;">${badgeHtml}</td>
-        <td>${recoHtml}</td>
+        <td style="text-align: center;">
+          <button class="btn-detail-sm" onclick="openModalKabidRincian('${d.daerah}')" title="Rincian per barang">
+            <i data-lucide="eye" style="width: 13px; height: 13px;"></i>
+            <span>Rincian</span>
+          </button>
+        </td>
       </tr>
     `;
   }).join("");
 
   if (counterEl) {
-    counterEl.textContent = `Menampilkan ${flatRows.length} baris evaluasi komoditas penguatan daerah` + (kabidSelectedWilayah ? ` (${kabidSelectedWilayah})` : "");
+    counterEl.textContent = `Menampilkan ${filteredDaerah.length} dari ${daerahMap.length} Kabupaten / Kota se-Jawa Barat`;
   }
 
   if (window.lucide) {
     lucide.createIcons();
+  }
+}
+
+// ========================================================
+// MODAL POP-UP RINCIAN PEMENUHAN PENGUATAN DAERAH (VIEW KABID)
+// ========================================================
+
+function openModalKabidRincian(daerahName) {
+  const { daerahMap } = computeKabidDataset();
+  const d = daerahMap.find(item => item.daerah === daerahName || item.daerah.replace("Kabupaten ", "Kab. ") === daerahName.replace("Kabupaten ", "Kab. "));
+  if (!d) return;
+
+  const modalEl = document.getElementById("modal-kabid-rincian-daerah");
+  if (!modalEl) return;
+
+  // Header Modal
+  const titleEl = document.getElementById("modal-kabid-title-daerah");
+  if (titleEl) titleEl.textContent = `Rincian Penguatan Logistik: ${d.daerah}`;
+
+  const isAman = d.status === "aman";
+  const badgeEl = document.getElementById("modal-kabid-badge-status");
+  if (badgeEl) {
+    badgeEl.className = `badge-status-pemenuhan ${isAman ? 'aman' : 'kurang'}`;
+    badgeEl.textContent = isAman ? `🟢 Aman (${d.capaian.toFixed(1)}%)` : `🟡 Kurang (${d.capaian.toFixed(1)}%)`;
+  }
+
+  const firstSurat = d.items.length > 0 && d.items[0].noSurat !== "-" ? d.items[0].noSurat : "PRM/2026/01/" + d.daerah.substring(0, 3).toUpperCase();
+  const subInfoEl = document.getElementById("modal-kabid-sub-info");
+  if (subInfoEl) {
+    subInfoEl.textContent = `Nomor Surat Permohonan: ${firstSurat} • Evaluasi Pagu Cadangan Tahunan`;
+  }
+
+  // Ringkasan Badges
+  const badgeMinta = document.getElementById("modal-kabid-total-minta-badge");
+  if (badgeMinta) badgeMinta.textContent = `Total Permintaan: ${d.minta.toLocaleString('id-ID')} Unit`;
+
+  const badgeSalur = document.getElementById("modal-kabid-total-salur-badge");
+  if (badgeSalur) badgeSalur.textContent = `Realisasi Salur: ${d.realisasi.toLocaleString('id-ID')} Unit`;
+
+  const badgeGap = document.getElementById("modal-kabid-total-gap-badge");
+  if (badgeGap) badgeGap.textContent = `Kesenjangan (Gap): ${d.gap.toLocaleString('id-ID')} Unit`;
+
+  // Tabel Rincian Barang
+  const tbody = document.getElementById("tbody-modal-kabid-rincian");
+  if (tbody) {
+    const katColors = {
+      "Pangan": { bg: "#EFF6FF", text: "#1D4ED8", border: "#BFDBFE" },
+      "Sandang": { bg: "#F5F3FF", text: "#6D28D9", border: "#DDD6FE" },
+      "Papan": { bg: "#FFF7ED", text: "#C2410C", border: "#FED7AA" },
+      "Logistik Lainnya": { bg: "#ECFDF5", text: "#047857", border: "#A7F3D0" }
+    };
+
+    if (d.items.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 2rem; color: #64748B;">
+            Belum ada rincian komoditas barang untuk wilayah ini.
+          </td>
+        </tr>
+      `;
+    } else {
+      tbody.innerHTML = d.items.map((it, idx) => {
+        const kColor = katColors[it.kategori] || { bg: "#F1F5F9", text: "#334155", border: "#CBD5E1" };
+        const itAman = it.status === "aman";
+        const itBadge = itAman
+          ? `<span class="badge-status-pemenuhan aman">Aman (${it.capaian.toFixed(0)}%)</span>`
+          : `<span class="badge-status-pemenuhan kurang">Kurang (${it.capaian.toFixed(0)}%)</span>`;
+
+        return `
+          <tr>
+            <td style="text-align: center; font-weight: 600; color: #64748B;">${idx + 1}</td>
+            <td>
+              <span class="badge-kat-pill" style="background-color: ${kColor.bg}; color: ${kColor.text}; border: 1px solid ${kColor.border};">
+                ${it.kategori}
+              </span>
+            </td>
+            <td style="font-weight: 700; color: #1E293B;">${it.barang}</td>
+            <td class="num-cell" style="font-weight: 700;">${it.diminta.toLocaleString('id-ID')}</td>
+            <td class="num-cell positive" style="font-weight: 700;">${it.realisasi.toLocaleString('id-ID')}</td>
+            <td class="num-cell ${it.gap > 0 ? 'negative' : ''}" style="font-weight: 700;">${it.gap.toLocaleString('id-ID')}</td>
+            <td style="text-align: center; font-weight: 800; color: ${itAman ? '#16A34A' : '#D97706'};">
+              ${it.capaian.toFixed(1)}%
+            </td>
+            <td style="text-align: center;">${itBadge}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+  }
+
+  modalEl.classList.add("active");
+  document.body.style.overflow = "hidden";
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+function closeModalKabidRincian() {
+  const modalEl = document.getElementById("modal-kabid-rincian-daerah");
+  if (modalEl) {
+    modalEl.classList.remove("active");
+  }
+  document.body.style.overflow = "";
+}
+
+function handleModalKabidBackdropClick(event) {
+  if (event.target && event.target.id === "modal-kabid-rincian-daerah") {
+    closeModalKabidRincian();
   }
 }
 
@@ -2146,14 +2263,20 @@ function renderKalakView() {
   const elKorKurang = document.getElementById("kpi-kalak-koreksi-kurang");
   if (elKorKurang) elKorKurang.textContent = `-${formatRupiahSingkat(korKurang)}`;
 
-  // Status risiko barang kadaluwarsa
-  const expItems = dataStore.daftarBarangKadaluwarsa || [];
-  const elExpSku = document.getElementById("kpi-kalak-sku-exp");
-  if (elExpSku) elExpSku.textContent = `${expItems.length} SKU`;
+  // SKU Murni Kadaluwarsa (Hanya yang benar-benar telah kedaluwarsa <= CUTOFF_DATE)
+  const allExpItems = dataStore.daftarBarangKadaluwarsa || [];
+  const CUTOFF_DATE = "2026-10-03";
+  const strictlyExpiredItems = allExpItems.filter(x => {
+    const expDate = x.tglKadaluwarsaAsli || x.tglKadaluwarsa;
+    return expDate && expDate <= CUTOFF_DATE;
+  });
 
-  const totalNilaiExp = expItems.reduce((acc, x) => acc + (x.nilaiTotal || 0), 0);
+  const elExpSku = document.getElementById("kpi-kalak-sku-exp");
+  if (elExpSku) elExpSku.textContent = `${strictlyExpiredItems.length} SKU`;
+
+  const totalNilaiExp = strictlyExpiredItems.reduce((acc, x) => acc + (x.nilaiTotal || 0), 0);
   const elExpVal = document.getElementById("kpi-kalak-exp-val-risk");
-  if (elExpVal) elExpVal.textContent = `Valuasi: ${formatRupiahSingkat(totalNilaiExp)}`;
+  if (elExpVal) elExpVal.textContent = `Aset Exp: ${formatRupiahSingkat(totalNilaiExp)}`;
 
   // 2. Render 2 Grafik Utama Finansial
   renderKalakCharts(dataStore, filteredTx);

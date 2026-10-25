@@ -90,9 +90,41 @@ def run_update():
                 "nilai_total": int(qty_in) * price
             })
 
+    # Target persentase pemenuhan per daerah (7 Aman ≥90%, 20 Kurang <90%, batas bawah 60%)
+    target_pcts = {
+        "Kabupaten Bogor": 0.975,
+        "Kabupaten Bekasi": 0.960,
+        "Kabupaten Garut": 0.948,
+        "Kota Depok": 0.935,
+        "Kabupaten Subang": 0.922,
+        "Kabupaten Sukabumi": 0.910,
+        "Kota Banjar": 0.902,
+        "Kabupaten Indramayu": 0.885,
+        "Kota Bogor": 0.868,
+        "Kota Sukabumi": 0.850,
+        "Kabupaten Pangandaran": 0.832,
+        "Kabupaten Karawang": 0.815,
+        "Kabupaten Tasikmalaya": 0.798,
+        "Kabupaten Majalengka": 0.780,
+        "Kota Cimahi": 0.762,
+        "Kabupaten Purwakarta": 0.745,
+        "Kabupaten Cirebon": 0.728,
+        "Kota Cirebon": 0.710,
+        "Kota Bandung": 0.695,
+        "Kabupaten Bandung Barat": 0.680,
+        "Kabupaten Ciamis": 0.665,
+        "Kota Bekasi": 0.650,
+        "Kota Tasikmalaya": 0.640,
+        "Kabupaten Bandung": 0.630,
+        "Kabupaten Cianjur": 0.620,
+        "Kabupaten Kuningan": 0.610,
+        "Kabupaten Sumedang": 0.600
+    }
+    all_daerah_ordered = list(target_pcts.keys())
+
     # Distribusi (50 baris)
     ws_dis_old = wb_old["Distribusi"]
-    distribusi_data = []
+    distribusi_raw = []
     for r in range(2, ws_dis_old.max_row + 1):
         dana = ws_dis_old.cell(r, 1).value
         barang = ws_dis_old.cell(r, 2).value
@@ -103,17 +135,33 @@ def run_update():
         doc = ws_dis_old.cell(r, 7).value
         if barang and qty_out and str(dana).strip() != "TOTAL DISTRIBUSI":
             price = get_unit_price(barang)
-            distribusi_data.append({
+            distribusi_raw.append({
                 "dana": dana,
                 "barang": barang,
                 "kat": kat,
                 "out": int(qty_out),
-                "tujuan": tujuan,
                 "tgl_out": tgl_out,
                 "doc": doc,
                 "harga_satuan": price,
                 "nilai_total": int(qty_out) * price
             })
+
+    # Urutkan distribusi berdasarkan kuantitas keluar terbesar ke terkecil
+    distribusi_raw.sort(key=lambda x: x["out"], reverse=True)
+
+    # Alokasikan 50 transaksi secara merata ke 27 daerah agar seluruh 27 daerah menerima penyaluran
+    distribusi_data = []
+    for i in range(27):
+        item = distribusi_raw[i]
+        item["tujuan"] = all_daerah_ordered[i]
+        distribusi_data.append(item)
+    for i in range(23):
+        item = distribusi_raw[27 + i]
+        item["tujuan"] = all_daerah_ordered[i]
+        distribusi_data.append(item)
+
+    # Kembalikan urutan kronologis berdasarkan tanggal keluar
+    distribusi_data.sort(key=lambda x: x["tgl_out"])
 
     # Stok Awal (60 baris)
     ws_awal_old = wb_old["Stok Awal"]
@@ -180,66 +228,32 @@ def run_update():
         realisasi_per_daerah_tahun[key] = realisasi_per_daerah_tahun.get(key, 0) + qty
         dist_by_daerah[daerah] = dist_by_daerah.get(daerah, 0) + qty
 
-    # Klasifikasi target pemenuhan daerah resmi BPBD Jawa Barat:
-    # 11 Daerah Aman (≥80%):
-    daerah_aman = [
-        "Kabupaten Bogor", "Kabupaten Bekasi", "Kabupaten Garut", "Kabupaten Subang",
-        "Kota Depok", "Kabupaten Sukabumi", "Kota Banjar", "Kabupaten Indramayu",
-        "Kota Bogor", "Kota Sukabumi", "Kabupaten Pangandaran"
-    ]
-    # 9 Daerah Kurang (50% - 79%):
-    daerah_kurang = [
-        "Kabupaten Karawang", "Kabupaten Tasikmalaya", "Kabupaten Majalengka",
-        "Kota Cimahi", "Kabupaten Purwakarta", "Kabupaten Cirebon",
-        "Kota Cirebon", "Kota Bandung", "Kabupaten Bandung Barat"
-    ]
-    # 7 Daerah Kritis (<50%):
-    daerah_kritis = [
-        "Kabupaten Ciamis", "Kota Bekasi", "Kota Tasikmalaya",
-        "Kabupaten Bandung", "Kabupaten Cianjur", "Kabupaten Kuningan", "Kabupaten Sumedang"
-    ]
-
-    target_perm = {}
-    for d in daerah_aman:
-        target_perm[d] = int(round(dist_by_daerah.get(d, 0) / 0.85 / 10) * 10)
-    for d in daerah_kurang:
-        target_perm[d] = int(round(dist_by_daerah.get(d, 0) / 0.63 / 10) * 10)
-
-    kritis_targets = {
-        "Kabupaten Ciamis": 1700,
-        "Kota Bekasi": 1500,
-        "Kota Tasikmalaya": 1400,
-        "Kabupaten Bandung": 3200,
-        "Kabupaten Cianjur": 3000,
-        "Kabupaten Kuningan": 2000,
-        "Kabupaten Sumedang": 1900
-    }
-    for d, v in kritis_targets.items():
-        target_perm[d] = v
-
-    # Kalibrasi agar total pas 58.450 unit
-    diff = 58450 - sum(target_perm.values())
-    target_perm["Kabupaten Bandung"] += diff
-
     nomor_surat_counter = 1
-    all_daerah_clean = [d for d in kab_kota_jabar if d != "-"]
 
-    for daerah in all_daerah_clean:
+    for daerah in all_daerah_ordered:
         prefix_daerah = "KOTA" if "Kota" in daerah else "KAB"
-        total_req_d = target_perm.get(daerah, 1500)
+        target_p = target_pcts[daerah]
+        real_d_total = dist_by_daerah.get(daerah, 0)
+
+        # Total permohonan yang ditargetkan untuk daerah ini agar rasio pemenuhan persis target_p
+        minta_d_total = int(round(real_d_total / target_p / 10) * 10)
+
         items_d = [(thn, b, k, qty) for (kota, thn, b, k), qty in realisasi_per_daerah_tahun.items() if kota == daerah]
         assigned_qty = 0
-        ratio = 0.85 if daerah in daerah_aman else (0.63 if daerah in daerah_kurang else 0.2)
         added_keys = set()
 
-        # 1. Masukkan item yang benar-benar terealisasi
+        # 1. Buat permohonan untuk komoditas yang memang didistribusikan
         for thn, b, k, qty in items_d:
             no_surat = f"360/{nomor_surat_counter:03d}/BPBD-{prefix_daerah}/I/{thn}"
             nomor_surat_counter += 1
             tgl_surat = datetime.date(thn, 1, 15)
-            req_item = int(round(qty / ratio / 10) * 10)
+
+            # Untuk daerah aman, komoditas yang disalurkan dipenuhi hampir penuh (95%-100%)
+            # Untuk daerah kurang, komoditas yang disalurkan dipenuhi sebagian
+            com_ratio = target_p if target_p >= 0.9 else min(1.0, target_p * 1.15)
+            req_item = max(qty, int(round(qty / com_ratio / 10) * 10))
             assigned_qty += req_item
-            added_keys.add((thn, b))
+            added_keys.add(b)
             price = get_unit_price(b)
 
             permohonan_data.append({
@@ -254,30 +268,33 @@ def run_update():
                 "estimasi_nilai": req_item * price
             })
 
-        # 2. Penuhi sisa kuota dengan komoditas buffer tahunan
-        rem = total_req_d - assigned_qty
-        if rem > 0:
-            slots = [
-                (2025, "Beras", "Pangan"),
-                (2025, "Selimut", "Sandang"),
-                (2026, "Makanan Siap Saji", "Pangan"),
-                (2026, "Family Kit", "Logistik Lainnya")
-            ]
-            available_slots = [s for s in slots if (s[0], s[1]) not in added_keys]
-            if not available_slots:
-                available_slots = [(2025, "Terpal", "Papan"), (2026, "Matras", "Sandang")]
+        # 2. Penuhi sisa kuota (gap) dengan komoditas kategori lain (Sandang, Pangan, Papan, Lainnya)
+        # sehingga setiap daerah memiliki rincian komoditas multi-kategori
+        rem = minta_d_total - assigned_qty
+        all_candidates = [
+            ("Beras", "Pangan"),
+            ("Makanan Siap Saji", "Pangan"),
+            ("Selimut", "Sandang"),
+            ("Matras", "Sandang"),
+            ("Terpal", "Papan"),
+            ("Family Kit", "Logistik Lainnya")
+        ]
+        needed_slots = [c for c in all_candidates if c[0] not in added_keys][:3]
 
-            piece = int(round(rem / len(available_slots) / 10) * 10)
-            for i, (thn, b, k) in enumerate(available_slots):
-                no_surat = f"360/{nomor_surat_counter:03d}/BPBD-{prefix_daerah}/I/{thn}"
+        if rem > 0 and needed_slots:
+            piece = int(round(rem / len(needed_slots) / 10) * 10)
+            for i, (b, k) in enumerate(needed_slots):
+                no_surat = f"360/{nomor_surat_counter:03d}/BPBD-{prefix_daerah}/I/2026"
                 nomor_surat_counter += 1
-                tgl_surat = datetime.date(thn, 1, 15)
-                q = rem - (piece * (len(available_slots) - 1)) if i == len(available_slots) - 1 else piece
+                tgl_surat = datetime.date(2026, 1, 15)
+                q = rem - (piece * (len(needed_slots) - 1)) if i == len(needed_slots) - 1 else piece
+                if q <= 0:
+                    continue
                 price = get_unit_price(b)
 
                 permohonan_data.append({
                     "no_surat": no_surat,
-                    "tahun_anggaran": thn,
+                    "tahun_anggaran": 2026,
                     "tgl_permohonan": tgl_surat + datetime.timedelta(days=random.randint(0, 10)),
                     "kab_kota": daerah,
                     "kategori": k,
